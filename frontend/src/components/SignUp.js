@@ -6,7 +6,7 @@ import './SignUp.css';
 function SignUp() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -30,25 +30,43 @@ function SignUp() {
     }
 
     try {
+      console.log('Sending signup request with data:', {
+        name: formData.name,
+        email: formData.email,
+        password: '***' // Hide password in logs
+      });
+
       const response = await axios.post('http://localhost:5000/api/auth/signup', {
-        username: formData.username,
+        name: formData.name,
         email: formData.email,
         password: formData.password
       });
 
+      console.log('Received response:', response.data);
+
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        navigate('/');
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        navigate('/account');
       } else {
         setError('Invalid response from server');
       }
     } catch (error) {
-      console.error('Error signing up:', error);
+      console.error('Full error object:', error);
       if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
         setError(error.response.data.message || 'An error occurred during sign up');
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+        setError('Could not connect to the server. Please check if the server is running.');
       } else {
-        setError('Network error. Please try again later.');
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error setting up request:', error.message);
+        setError('An error occurred while setting up the request.');
       }
     }
   };
@@ -67,16 +85,16 @@ function SignUp() {
           <form onSubmit={handleSubmit} className="signup-form">
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="username">Username</label>
+                <label htmlFor="name">Full Name</label>
                 <div className="input-group">
                   <i className="bx bx-user"></i>
                   <input
                     type="text"
-                    id="username"
-                    name="username"
-                    value={formData.username}
+                    id="name"
+                    name="name"
+                    value={formData.name}
                     onChange={handleChange}
-                    placeholder="Choose a username"
+                    placeholder="Enter your full name"
                     required
                   />
                 </div>
@@ -101,7 +119,7 @@ function SignUp() {
               </div>
             </div>
 
-            <div className="form-row two-columns">
+            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="password">Password</label>
                 <div className="input-group">

@@ -1,0 +1,207 @@
+.user-account-page {
+  padding: 2rem;
+  margin-top: 64px;
+  min-height: calc(100vh - 64px);
+  background-color: #f7fafc;
+}
+
+.user-account-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.user-account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.user-account-header h1 {
+  font-size: 1.8rem;
+  color: #2d3748;
+  margin: 0;
+}
+
+.edit-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: white;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-button:hover {
+  background-color: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.edit-button i {
+  font-size: 1rem;
+}
+
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #c6f6d5;
+  color: #2f855a;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+
+.user-account-form {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.form-group input {
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-group input:disabled {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+}
+
+.save-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 1rem;
+}
+
+.save-button:hover {
+  background-color: #3182ce;
+}
+
+.save-button i {
+  font-size: 1rem;
+}
+
+.user-account-info {
+  background-color: #f7fafc;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.user-account-info h2 {
+  font-size: 1.2rem;
+  color: #2d3748;
+  margin: 0 0 1rem 0;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.info-label {
+  font-weight: 500;
+  color: #4a5568;
+  min-width: 120px;
+}
+
+.user-role {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.user-role.admin {
+  background-color: #fed7d7;
+  color: #c53030;
+}
+
+.user-role.user {
+  background-color: #e2e8f0;
+  color: #4a5568;
+}
+
+.user-account-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px);
+  margin-top: 64px;
+  color: #4a5568;
+  font-size: 1.2rem;
+}
+
+.user-account-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px);
+  margin-top: 64px;
+  color: #c53030;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  .user-account-page {
+    padding: 1rem;
+  }
+
+  .user-account-container {
+    padding: 1.5rem;
+  }
+
+  .user-account-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .form-group input {
+    font-size: 16px; /* Prevents zoom on mobile */
+  }
+} 

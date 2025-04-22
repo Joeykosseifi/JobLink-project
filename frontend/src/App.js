@@ -10,6 +10,9 @@ import Jobs from './components/Jobs';
 import ContactUs from './components/ContactUs';
 import JobSeeker from './components/JobSeeker';
 import PostJob from './components/PostJob';
+import AdminDashboard from './components/AdminDashboard';
+import UserAccount from './components/UserAccount';
+import Settings from './components/Settings';
 import './App.css';
 
 function App() {
@@ -26,6 +29,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/jobseeker" element={<JobSeeker />} />
           <Route path="/postjob" element={<PostJob />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/user/account" element={<UserAccount />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </div>
     </Router>

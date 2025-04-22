@@ -23,10 +23,17 @@ function Login() {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', formData);
-      if (response.data.token) {
+      
+      if (response.data.token && response.data.data && response.data.data.user) {
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        navigate('/');
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        
+        // If user is admin, redirect to admin dashboard, otherwise go to home
+        if (response.data.data.user.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/');
+        }
       } else {
         setError('Invalid response from server');
       }
