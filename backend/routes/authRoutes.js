@@ -1,11 +1,12 @@
-const express = require('express');
+import express from 'express';
+import { signup, login, getProfile } from '../controllers/authController.js';
+import { protect } from '../middleware/auth.js';
+
 const router = express.Router();
-const authController = require('../controllers/authController');
-const { protect } = require('../middleware/auth');
 
 // Public routes
-router.post('/signup', authController.signup);
-router.post('/login', authController.login);
+router.post('/signup', signup);
+router.post('/login', login);
 
 // Debug route - remove in production
 router.get('/debug/users', async (req, res) => {
@@ -19,6 +20,6 @@ router.get('/debug/users', async (req, res) => {
 });
 
 // Protected routes
-router.get('/profile', protect, authController.getProfile);
+router.get('/profile', protect, getProfile);
 
-module.exports = router; 
+export default router; 

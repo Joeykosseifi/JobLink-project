@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import validator from 'validator';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
-    select: false
+    select: true
   },
   createdAt: {
     type: Date,
@@ -90,6 +90,4 @@ userSchema.methods.correctPassword = async function(candidatePassword) {
   }
 };
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User; 
+export default mongoose.model('User', userSchema); 

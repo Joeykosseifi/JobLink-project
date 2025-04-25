@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-exports.protect = async (req, res, next) => {
+export const protect = async (req, res, next) => {
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
@@ -21,6 +21,7 @@ exports.protect = async (req, res, next) => {
     }
 
     // Check if user is active
+    console.log(`user from backend: ${user}`);
     if (!user.active) {
       return res.status(401).json({ message: 'User account is deactivated' });
     }
@@ -38,7 +39,7 @@ exports.protect = async (req, res, next) => {
 };
 
 // Middleware to restrict access based on roles
-exports.restrictTo = (...roles) => {
+export const restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({

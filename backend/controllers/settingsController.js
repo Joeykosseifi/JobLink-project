@@ -1,7 +1,7 @@
-const User = require('../models/User');
+import User from '../models/User.js';
 
 // Get user settings
-exports.getSettings = async (req, res) => {
+export const getSettings = async (req, res) => {
   try {
     const userId = req.user.id;
     const user = await User.findById(userId);
@@ -45,7 +45,7 @@ exports.getSettings = async (req, res) => {
 };
 
 // Update user settings
-exports.updateSettings = async (req, res) => {
+export const updateSettings = async (req, res) => {
   try {
     const userId = req.user.id;
     const { settings } = req.body;

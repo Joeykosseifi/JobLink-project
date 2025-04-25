@@ -69,7 +69,7 @@ const UserAccount = () => {
       }
 
       // Log request details for debugging
-      console.log('Sending request to:', 'http://localhost:5000/api/users/update-profile');
+      console.log('Sending request to:', 'http://localhost:5001/api/users/update-profile');
       console.log('Request headers:', {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
@@ -82,7 +82,7 @@ const UserAccount = () => {
       });
 
       const response = await axios.put(
-        'http://localhost:5000/api/users/update-profile',
+        'http://localhost:5001/api/users/update-profile',
         {
           name: formData.name,
           email: formData.email,

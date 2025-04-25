@@ -1,8 +1,8 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
 
 // Update user profile
-exports.updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
   try {
     const { name, email, currentPassword, newPassword } = req.body;
     const userId = req.user.id; // This will come from the auth middleware

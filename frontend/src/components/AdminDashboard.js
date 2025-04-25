@@ -10,7 +10,7 @@ function AdminDashboard() {
   const fetchUsers = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/admin/users', {
+      const response = await axios.get('http://localhost:5001/api/admin/users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -42,7 +42,7 @@ function AdminDashboard() {
 
       const token = localStorage.getItem('token');
       await axios.patch(
-        `http://localhost:5000/api/admin/users/${userId}`,
+          `http://localhost:5001/api/admin/users/${userId}`,
         { role: newRole },
         {
           headers: {
@@ -66,7 +66,7 @@ function AdminDashboard() {
       }
 
       const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, {
+      await axios.delete(`http://localhost:5001/api/admin/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
