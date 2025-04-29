@@ -106,7 +106,7 @@ function Home() {
     { 
       id: 1, 
       title: 'Kitchen Staff', 
-      icon: 'bx bx-chef-hat',
+      icon: 'bx bx-bowl-hot',
       description: 'Chef, Line Cook, Pastry Chef', 
       count: 450 
     },
@@ -191,12 +191,12 @@ function Home() {
 
   // Top employers
   const topEmployers = [
-    { id: 1, name: 'Phoenicia Hotel', logo: 'https://via.placeholder.com/150x80?text=Phoenicia' },
-    { id: 2, name: 'Em Sherif', logo: 'https://via.placeholder.com/150x80?text=EmSherif' },
-    { id: 3, name: 'Le Gray Hotel', logo: 'https://via.placeholder.com/150x80?text=LeGray' },
-    { id: 4, name: 'Babel', logo: 'https://via.placeholder.com/150x80?text=Babel' },
-    { id: 5, name: 'Beirut Marriott', logo: 'https://via.placeholder.com/150x80?text=Marriott' },
-    { id: 6, name: 'Casper & Gambini\'s', logo: 'https://via.placeholder.com/150x80?text=C&G' }
+    { id: 1, name: 'Phoenicia Hotel', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e6/Phoenicia_Hotel_Beirut_Logo.svg/320px-Phoenicia_Hotel_Beirut_Logo.svg.png' },
+    { id: 2, name: 'Em Sherif', logo: 'https://emsherif.com/assets/img/logo-dark.png' },
+    { id: 3, name: 'Le Gray Hotel', logo: 'https://www.legray.com/images/logo.png' },
+    { id: 4, name: 'Babel', logo: 'https://babel.com.lb/images/logo.png' },
+    { id: 5, name: 'Beirut Marriott', logo: 'https://www.marriott.com/images/logo.png' },
+    { id: 6, name: 'Casper & Gambini\'s', logo: 'https://caspergambinis.com/images/logo.png' }
   ];
 
   return (
@@ -300,7 +300,9 @@ function Home() {
         <div className="employers-container">
           {topEmployers.map(employer => (
             <div key={employer.id} className="employer-card">
-              <img src={employer.logo} alt={employer.name} />
+              <div className="employer-logo">
+                <i className="bx bx-building-house"></i>
+              </div>
               <h3>{employer.name}</h3>
             </div>
           ))}

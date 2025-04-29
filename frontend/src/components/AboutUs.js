@@ -30,11 +30,31 @@ function AboutUs() {
   ];
 
   const partnerships = [
-    { name: "Lebanese Restaurant Association", logo: "https://via.placeholder.com/150x80?text=LRA" },
-    { name: "Beirut Hotel School", logo: "https://via.placeholder.com/150x80?text=BHS" },
-    { name: "Syndicate of Owners of Restaurants, Cafes, Night-Clubs & Pastries", logo: "https://via.placeholder.com/150x80?text=Syndicate" },
-    { name: "Lebanese Ministry of Tourism", logo: "https://via.placeholder.com/150x80?text=Tourism" },
-    { name: "Hospitality Services Lebanon", logo: "https://via.placeholder.com/150x80?text=HSL" }
+    { 
+      name: "Lebanese Restaurant Association", 
+      logo: "https://www.lebanesefoodbank.org/wp-content/uploads/2020/03/Lebanese-Food-Bank.png",
+      description: "Supporting restaurant standards and growth across Lebanon"
+    },
+    { 
+      name: "Beirut Hotel School", 
+      logo: "https://www.ehl.edu/sites/default/files/2022-06/ehl-logo.svg",
+      description: "Training the next generation of hospitality professionals"
+    },
+    { 
+      name: "Syndicate of Restaurants", 
+      logo: "https://i0.wp.com/www.syndicateofrestaurants.com/wp-content/uploads/2019/10/logo.png",
+      description: "Representing Lebanon's dining establishments"
+    },
+    { 
+      name: "Lebanese Ministry of Tourism", 
+      logo: "https://www.destinationlebanon.gov.lb/assets/elements/logo/en-logo1.png",
+      description: "Promoting Lebanon's hospitality sector globally"
+    },
+    { 
+      name: "Hospitality Services Lebanon", 
+      logo: "https://hospitalityservices.com.lb/wp-content/uploads/2019/03/logo.svg",
+      description: "Providing resources for industry excellence"
+    }
   ];
 
   const stats = [
@@ -204,8 +224,11 @@ function AboutUs() {
           <div className="partners-grid">
             {partnerships.map((partner, index) => (
               <div className="partner-card" key={index}>
-                <img src={partner.logo} alt={partner.name} />
-                <p>{partner.name}</p>
+                <div className="partner-logo">
+                  <i className="fas fa-handshake"></i>
+                </div>
+                <h3>{partner.name}</h3>
+                <p>{partner.description}</p>
               </div>
             ))}
           </div>
