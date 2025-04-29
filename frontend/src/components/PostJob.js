@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import './PostJob.css';
 
 function PostJob() {
@@ -7,6 +8,10 @@ function PostJob() {
   const [tagInput, setTagInput] = useState('');
   const [previewMode, setPreviewMode] = useState(false);
   
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
   const [formData, setFormData] = useState({
     title: '',
     company: '',
@@ -98,15 +103,66 @@ function PostJob() {
     window.scrollTo(0, 0);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission with formData and tags
-    const submissionData = {
-      ...formData,
-      skills: tags
-    };
-    console.log(submissionData);
-    alert('Job posted successfully!');
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Prepare data for submission
+      const submissionData = {
+        ...formData,
+        skills: tags
+      };
+      
+      // Send data to the backend API
+      const response = await axios.post('http://localhost:5000/api/jobs', submissionData, {
+        headers: {
+          'Content-Type': 'application/json',
+          // Include authorization header if user is logged in
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      console.log('Job posted successfully:', response.data);
+      setSuccess(true);
+      setLoading(false);
+      
+      
+      
+      // Reset form after successful submission
+      setFormData({
+        title: '',
+        company: '',
+        location: '',
+        type: 'full-time',
+        category: 'kitchen-staff',
+        experience: 'entry',
+        deadline: '',
+        description: '',
+        responsibilities: '',
+        requirements: '',
+        benefits: '',
+        salary: '',
+        contactEmail: '',
+        contactPhone: '',
+        companyLogo: '',
+        companyWebsite: '',
+        companyDescription: '',
+        remote: false,
+        urgent: false,
+        featured: false
+      });
+      setTags([]);
+      setCurrentStep(1);
+      setPreviewMode(false);
+      
+    } catch (error) {
+      setLoading(false);
+      setError(error.response?.data?.message || 'Failed to post job. Please try again.');
+      console.error('Error posting job:', error);
+      alert('Error posting job: ' + (error.response?.data?.message || 'Please try again.'));
+    }
   };
 
   const renderFormStep = () => {
@@ -695,11 +751,31 @@ function PostJob() {
 
   return (
     <div className="postjob-container">
+      {loading && (
+        <div className="loading-overlay">
+          <div className="spinner"></div>
+          <p>Submitting your job posting...</p>
+        </div>
+      )}
+      
       <div className="card postjob-card">
         {!previewMode ? (
           <>
             <h1>Post a New Job</h1>
             <p className="subtitle">Connect with top talent in Lebanon's hospitality industry</p>
+            
+            {success && (
+              <div className="alert success-alert">
+                <i className='bx bx-check-circle'></i> Job posted successfully!
+              </div>
+            )}
+            
+            {error && (
+              <div className="alert error-alert">
+                <i className='bx bx-error-circle'></i> {error}
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="postjob-form">
               {renderFormStep()}
             </form>
@@ -707,7 +783,7 @@ function PostJob() {
         ) : (
           <form onSubmit={handleSubmit} className="postjob-form">
             {renderPreview()}
-        </form>
+          </form>
         )}
       </div>
       
