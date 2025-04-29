@@ -212,7 +212,7 @@ function Home() {
             Post a Job
           </button>
           <button 
-            onClick={() => handleButtonClick('/jobseeker')} 
+            onClick={() => handleButtonClick('/jobs')} 
             className="action-button search-jobs-button"
           >
             Search for Jobs

@@ -7,8 +7,9 @@ import Login from './components/login';
 import SignUp from './components/SignUp';
 import AboutUs from './components/AboutUs';
 import Jobs from './components/Jobs';
+import JobDetail from './components/JobDetail';
 import ContactUs from './components/ContactUs';
-import JobSeeker from './components/JobSeeker';
+
 import PostJob from './components/PostJob';
 import AdminDashboard from './components/AdminDashboard';
 import UserAccount from './components/UserAccount';
@@ -23,11 +24,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/jobseeker" element={<JobSeeker />} />
           <Route path="/postjob" element={<PostJob />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/user/account" element={<UserAccount />} />
