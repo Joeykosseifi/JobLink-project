@@ -35,7 +35,7 @@ const Settings = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:5001/api/settings', {
+        const response = await axios.get('http://localhost:5000/api/settings', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -89,7 +89,7 @@ const Settings = () => {
 
       console.log('Sending settings update request...');
       const response = await axios.put(
-        'http://localhost:5001/api/settings',
+        'http://localhost:5000/api/settings',
         { settings },
         {
           headers: {
