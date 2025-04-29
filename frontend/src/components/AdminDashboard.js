@@ -4,6 +4,7 @@ import './AdminDashboard.css';
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -11,13 +12,43 @@ function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  const [activeTab, setActiveTab] = useState('users'); // users or jobs
+  const [jobSearch, setJobSearch] = useState('');
+  const [jobCategoryFilter, setJobCategoryFilter] = useState('all');
+  const [jobTypeFilter, setJobTypeFilter] = useState('all');
+  const [currentJobPage, setCurrentJobPage] = useState(1);
   const usersPerPage = 5;
+  const jobsPerPage = 5;
+
+  // Job categories for filter
+  const jobCategories = [
+    { value: 'all', label: 'All Categories' },
+    { value: 'kitchen-staff', label: 'Kitchen Staff' },
+    { value: 'restaurant-service', label: 'Restaurant Service' },
+    { value: 'hotel-operations', label: 'Hotel Operations' },
+    { value: 'catering-events', label: 'Catering & Events' },
+    { value: 'bar-service', label: 'Bar Service' },
+    { value: 'food-delivery', label: 'Food Delivery' },
+    { value: 'cafe-coffee', label: 'Cafe & Coffee Shops' },
+    { value: 'resort-leisure', label: 'Resort & Leisure' }
+  ];
+
+  // Job types for filter
+  const jobTypes = [
+    { value: 'all', label: 'All Types' },
+    { value: 'full-time', label: 'Full-time' },
+    { value: 'part-time', label: 'Part-time' },
+    { value: 'contract', label: 'Contract' },
+    { value: 'internship', label: 'Internship' },
+    { value: 'seasonal', label: 'Seasonal' },
+    { value: 'temporary', label: 'Temporary' }
+  ];
 
   // Stats data
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
-    totalJobs: 23,
+    totalJobs: 0,
     applications: 157,
     revenue: 12589
   });
@@ -49,9 +80,32 @@ function AdminDashboard() {
     }
   }, []);
 
+  const fetchJobs = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/jobs', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      const fetchedJobs = response.data.data.jobs;
+      setJobs(fetchedJobs);
+      
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        totalJobs: fetchedJobs.length
+      }));
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+    fetchJobs();
+  }, [fetchUsers, fetchJobs]);
 
   const handleEditUser = useCallback(async (userId) => {
     try {
@@ -113,6 +167,43 @@ function AdminDashboard() {
     }
   }, [users]);
 
+  const handleEditJob = useCallback(async (jobId) => {
+    try {
+      window.location.href = `/jobs/${jobId}`;
+    } catch (err) {
+      console.error('Error navigating to job:', err);
+      alert('Failed to navigate to job edit page');
+    }
+  }, []);
+
+  const handleDeleteJob = useCallback(async (jobId) => {
+    try {
+      if (!window.confirm('Are you sure you want to delete this job?')) {
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      await axios.delete(`http://localhost:5000/api/jobs/${jobId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setJobs(prevJobs => prevJobs.filter(job => job._id !== jobId));
+      
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        totalJobs: prev.totalJobs - 1
+      }));
+      
+      alert('Job deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting job:', err);
+      alert(err.response?.data?.message || 'Failed to delete job');
+    }
+  }, []);
+
   // Filter users based on search and filters
   const filteredUsers = users.filter(user => {
     // Search filter
@@ -135,20 +226,59 @@ function AdminDashboard() {
     return searchMatch && roleMatch && statusMatch;
   });
 
-  // Pagination
+  // Filter jobs based on search and filters
+  const filteredJobs = jobs.filter(job => {
+    // Search filter
+    const searchMatch = 
+      jobSearch === '' || 
+      job.title.toLowerCase().includes(jobSearch.toLowerCase()) ||
+      job.company.toLowerCase().includes(jobSearch.toLowerCase()) ||
+      (job.location && job.location.toLowerCase().includes(jobSearch.toLowerCase()));
+    
+    // Category filter
+    const categoryMatch = 
+      jobCategoryFilter === 'all' || 
+      job.category === jobCategoryFilter;
+    
+    // Type filter
+    const typeMatch = 
+      jobTypeFilter === 'all' || 
+      job.type === jobTypeFilter;
+    
+    return searchMatch && categoryMatch && typeMatch;
+  });
+
+  // Pagination for users
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+  const totalUserPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  // Pagination for jobs
+  const indexOfLastJob = currentJobPage * jobsPerPage;
+  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+  const totalJobPages = Math.ceil(filteredJobs.length / jobsPerPage);
 
   const paginate = (pageNumber) => {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
+    if (pageNumber > 0 && pageNumber <= totalUserPages) {
       setCurrentPage(pageNumber);
+    }
+  };
+
+  const paginateJobs = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalJobPages) {
+      setCurrentJobPage(pageNumber);
     }
   };
 
   const toggleSidebar = () => {
     setSidebarExpanded(!sidebarExpanded);
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   if (loading) {
@@ -198,11 +328,19 @@ function AdminDashboard() {
           </a>
           
           <div className="menu-category">Management</div>
-          <a href="#users" className="menu-item">
+          <a 
+            href="#users" 
+            className={`menu-item ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
             <i className="fas fa-users"></i>
             <span>Users</span>
           </a>
-          <a href="#jobs" className="menu-item">
+          <a 
+            href="#jobs" 
+            className={`menu-item ${activeTab === 'jobs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('jobs')}
+          >
             <i className="fas fa-briefcase"></i>
             <span>Jobs</span>
           </a>
@@ -229,8 +367,8 @@ function AdminDashboard() {
 
       {/* Main Content */}
       <div className="admin-main">
-      <div className="admin-header">
-        <h1>Admin Dashboard</h1>
+        <div className="admin-header">
+          <h1>Admin Dashboard</h1>
           <p>Manage users, track statistics, and monitor platform activity</p>
         </div>
 
@@ -293,160 +431,343 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Users Section */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <h2>User Management</h2>
-            <div className="actions">
-              <button className="btn btn-secondary">
-                <i className="fas fa-download"></i> Export
-              </button>
-              <button className="btn btn-primary">
-                <i className="fas fa-plus"></i> Add User
-              </button>
-            </div>
-          </div>
-
-          {/* Search and Filter */}
-          <div className="search-and-filter">
-            <div className="search-input">
-              <i className="fas fa-search"></i>
-              <input 
-                type="text" 
-                placeholder="Search users..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setCurrentPage(1); // Reset to first page on search
-                }}
-              />
-            </div>
-            <div className="filter-group">
-              <select 
-                className="filter-select"
-                value={roleFilter}
-                onChange={(e) => {
-                  setRoleFilter(e.target.value);
-                  setCurrentPage(1); // Reset to first page on filter change
-                }}
-              >
-                <option value="all">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
-                <option value="employer">Employer</option>
-              </select>
-              <select 
-                className="filter-select"
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setCurrentPage(1); // Reset to first page on filter change
-                }}
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-      </div>
-
-          {/* Users Table */}
-      <div className="users-table-container">
-        <table className="users-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Created At</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-                {currentUsers.length > 0 ? (
-                  currentUsers.map((user) => (
-              <tr key={user._id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>
-                        <span className={`role-badge ${user.role}`}>{user.role}</span>
-                </td>
-                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                <td>
-                  <span className={`status-badge ${user.active ? 'active' : 'inactive'}`}>
-                    {user.active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td>
-                  <div className="action-buttons">
-                          <button 
-                            className="action-btn view"
-                            title="View Details"
-                          >
-                            <i className="fas fa-eye"></i>
-                          </button>
-                    <button 
-                      className="action-btn edit"
-                      onClick={() => handleEditUser(user._id)}
-                            title="Edit User"
-                    >
-                            <i className="fas fa-edit"></i>
-                    </button>
-                    <button 
-                      className="action-btn delete"
-                      onClick={() => handleDeleteUser(user._id)}
-                            title="Delete User"
-                    >
-                            <i className="fas fa-trash-alt"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
-                      No users found matching the current filters.
-                    </td>
-                  </tr>
-                )}
-          </tbody>
-        </table>
-          </div>
-
-          {/* Pagination */}
-          {filteredUsers.length > 0 && (
-            <div className="pagination">
-              <button 
-                className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
-                onClick={() => paginate(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <i className="fas fa-chevron-left"></i>
-              </button>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
-                <button
-                  key={number}
-                  className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
-                  onClick={() => paginate(number)}
-                >
-                  {number}
-                </button>
-              ))}
-              
-              <button 
-                className={`pagination-btn ${currentPage === totalPages ? 'disabled' : ''}`}
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                <i className="fas fa-chevron-right"></i>
-              </button>
-            </div>
-          )}
+        {/* Tab Navigation */}
+        <div className="dashboard-tabs">
+          <button 
+            className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
+            <i className="fas fa-users"></i> User Management
+          </button>
+          <button 
+            className={`tab-btn ${activeTab === 'jobs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('jobs')}
+          >
+            <i className="fas fa-briefcase"></i> Job Management
+          </button>
         </div>
 
+        {/* Users Section */}
+        {activeTab === 'users' && (
+          <div className="dashboard-section">
+            <div className="section-header">
+              <h2>User Management</h2>
+              <div className="actions">
+                <button className="btn btn-secondary">
+                  <i className="fas fa-download"></i> Export
+                </button>
+                <button className="btn btn-primary">
+                  <i className="fas fa-plus"></i> Add User
+                </button>
+              </div>
+            </div>
+
+            {/* Search and Filter */}
+            <div className="search-and-filter">
+              <div className="search-input">
+                <i className="fas fa-search"></i>
+                <input 
+                  type="text" 
+                  placeholder="Search users..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1); // Reset to first page on search
+                  }}
+                />
+              </div>
+              <div className="filter-group">
+                <select 
+                  className="filter-select"
+                  value={roleFilter}
+                  onChange={(e) => {
+                    setRoleFilter(e.target.value);
+                    setCurrentPage(1); // Reset to first page on filter change
+                  }}
+                >
+                  <option value="all">All Roles</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                  <option value="employer">Employer</option>
+                </select>
+                <select 
+                  className="filter-select"
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setCurrentPage(1); // Reset to first page on filter change
+                  }}
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Users Table */}
+            <div className="users-table-container">
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentUsers.length > 0 ? (
+                    currentUsers.map((user) => (
+                      <tr key={user._id}>
+                        <td>{user.name}</td>
+                        <td>{user.email}</td>
+                        <td>
+                          <span className={`role-badge ${user.role}`}>{user.role}</span>
+                        </td>
+                        <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                        <td>
+                          <span className={`status-badge ${user.active ? 'active' : 'inactive'}`}>
+                            {user.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <button 
+                              className="action-btn view"
+                              title="View Details"
+                            >
+                              <i className="fas fa-eye"></i>
+                            </button>
+                            <button 
+                              className="action-btn edit"
+                              onClick={() => handleEditUser(user._id)}
+                              title="Edit User"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button 
+                              className="action-btn delete"
+                              onClick={() => handleDeleteUser(user._id)}
+                              title="Delete User"
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>
+                        No users found matching the current filters.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {filteredUsers.length > 0 && (
+              <div className="pagination">
+                <button 
+                  className={`pagination-btn ${currentPage === 1 ? 'disabled' : ''}`}
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  <i className="fas fa-chevron-left"></i>
+                </button>
+                
+                {Array.from({ length: totalUserPages }, (_, i) => i + 1).map(number => (
+                  <button
+                    key={number}
+                    className={`pagination-btn ${currentPage === number ? 'active' : ''}`}
+                    onClick={() => paginate(number)}
+                  >
+                    {number}
+                  </button>
+                ))}
+                
+                <button 
+                  className={`pagination-btn ${currentPage === totalUserPages ? 'disabled' : ''}`}
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalUserPages}
+                >
+                  <i className="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Jobs Section */}
+        {activeTab === 'jobs' && (
+          <div className="dashboard-section">
+            <div className="section-header">
+              <h2>Job Management</h2>
+              <div className="actions">
+                <button className="btn btn-secondary">
+                  <i className="fas fa-download"></i> Export
+                </button>
+                <a href="/postjob" className="btn btn-primary">
+                  <i className="fas fa-plus"></i> Post New Job
+                </a>
+              </div>
+            </div>
+
+            {/* Search and Filter */}
+            <div className="search-and-filter">
+              <div className="search-input">
+                <i className="fas fa-search"></i>
+                <input 
+                  type="text" 
+                  placeholder="Search jobs..."
+                  value={jobSearch}
+                  onChange={(e) => {
+                    setJobSearch(e.target.value);
+                    setCurrentJobPage(1); // Reset to first page on search
+                  }}
+                />
+              </div>
+              <div className="filter-group">
+                <select 
+                  className="filter-select"
+                  value={jobCategoryFilter}
+                  onChange={(e) => {
+                    setJobCategoryFilter(e.target.value);
+                    setCurrentJobPage(1); // Reset to first page on filter change
+                  }}
+                >
+                  {jobCategories.map(category => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+                <select 
+                  className="filter-select"
+                  value={jobTypeFilter}
+                  onChange={(e) => {
+                    setJobTypeFilter(e.target.value);
+                    setCurrentJobPage(1); // Reset to first page on filter change
+                  }}
+                >
+                  {jobTypes.map(type => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Jobs Table */}
+            <div className="users-table-container">
+              <table className="users-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Company</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Posted On</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentJobs.length > 0 ? (
+                    currentJobs.map((job) => (
+                      <tr key={job._id}>
+                        <td>{job.title}</td>
+                        <td>{job.company}</td>
+                        <td>{job.location}</td>
+                        <td>
+                          <span className={`role-badge job-type-${job.type}`}>
+                            {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
+                          </span>
+                        </td>
+                        <td>{formatDate(job.createdAt)}</td>
+                        <td>
+                          <span className={`status-badge ${job.featured ? 'featured' : job.urgent ? 'urgent' : 'active'}`}>
+                            {job.featured ? 'Featured' : job.urgent ? 'Urgent' : 'Active'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <a 
+                              href={`/jobs/${job._id}`}
+                              className="action-btn view"
+                              title="View Details"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <i className="fas fa-eye"></i>
+                            </a>
+                            <button 
+                              className="action-btn edit"
+                              onClick={() => handleEditJob(job._id)}
+                              title="Edit Job"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button 
+                              className="action-btn delete"
+                              onClick={() => handleDeleteJob(job._id)}
+                              title="Delete Job"
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
+                        No jobs found matching the current filters.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {filteredJobs.length > 0 && (
+              <div className="pagination">
+                <button 
+                  className={`pagination-btn ${currentJobPage === 1 ? 'disabled' : ''}`}
+                  onClick={() => paginateJobs(currentJobPage - 1)}
+                  disabled={currentJobPage === 1}
+                >
+                  <i className="fas fa-chevron-left"></i>
+                </button>
+                
+                {Array.from({ length: totalJobPages }, (_, i) => i + 1).map(number => (
+                  <button
+                    key={number}
+                    className={`pagination-btn ${currentJobPage === number ? 'active' : ''}`}
+                    onClick={() => paginateJobs(number)}
+                  >
+                    {number}
+                  </button>
+                ))}
+                
+                <button 
+                  className={`pagination-btn ${currentJobPage === totalJobPages ? 'disabled' : ''}`}
+                  onClick={() => paginateJobs(currentJobPage + 1)}
+                  disabled={currentJobPage === totalJobPages}
+                >
+                  <i className="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
