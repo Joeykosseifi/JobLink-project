@@ -64,7 +64,7 @@ function AboutUs() {
       {/* Hero Section */}
       <div className="about-hero">
         <div className="about-hero-content">
-          <h1>About JobLink</h1>
+      <h1>About JobLink</h1>
           <p>Connecting talent with opportunity in Lebanon's hospitality industry</p>
         </div>
       </div>
