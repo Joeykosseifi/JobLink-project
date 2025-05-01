@@ -12,6 +12,9 @@ import ContactUs from './components/ContactUs';
 
 import PostJob from './components/PostJob';
 import AdminDashboard from './components/AdminDashboard';
+import AdminMessages from './components/AdminMessages';
+import AdminAnalytics from './components/AdminAnalytics';
+import AdminApplications from './components/AdminApplications';
 import UserAccount from './components/UserAccount';
 import Settings from './components/Settings';
 import './App.css';
@@ -31,6 +34,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/postjob" element={<PostJob />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<AdminDashboard activeTab="users" />} />
+          <Route path="/admin/jobs" element={<AdminDashboard activeTab="jobs" />} />
+          <Route path="/admin/messages" element={<AdminMessages />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/applications" element={<AdminApplications />} />
           <Route path="/user/account" element={<UserAccount />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

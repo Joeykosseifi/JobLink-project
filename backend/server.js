@@ -7,6 +7,8 @@ import adminRoutes from './routes/adminRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
+import applicationRoutes from './routes/applicationRoutes.js';
 
 dotenv.config();
 
@@ -57,6 +59,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/applications', applicationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

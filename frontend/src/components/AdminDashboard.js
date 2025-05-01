@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import './AdminDashboard.css';
 
-function AdminDashboard() {
+function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +13,7 @@ function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
-  const [activeTab, setActiveTab] = useState('users'); // users or jobs
+  const [activeTab, setActiveTab] = useState(initialActiveTab); // users or jobs
   const [jobSearch, setJobSearch] = useState('');
   const [jobCategoryFilter, setJobCategoryFilter] = useState('all');
   const [jobTypeFilter, setJobTypeFilter] = useState('all');
@@ -318,50 +319,52 @@ function AdminDashboard() {
         </div>
         <div className="sidebar-menu">
           <div className="menu-category">Dashboard</div>
-          <a href="#overview" className="menu-item active">
+          <Link to="/admin/dashboard" className="menu-item active">
             <i className="fas fa-home"></i>
             <span>Overview</span>
-          </a>
-          <a href="#analytics" className="menu-item">
+          </Link>
+          <Link to="/admin/analytics" className="menu-item">
             <i className="fas fa-chart-line"></i>
             <span>Analytics</span>
-          </a>
+          </Link>
           
           <div className="menu-category">Management</div>
-          <a 
-            href="#users" 
+          <Link 
+            to="/admin/users" 
             className={`menu-item ${activeTab === 'users' ? 'active' : ''}`}
-            onClick={() => setActiveTab('users')}
           >
             <i className="fas fa-users"></i>
             <span>Users</span>
-          </a>
-          <a 
-            href="#jobs" 
+          </Link>
+          <Link 
+            to="/admin/jobs" 
             className={`menu-item ${activeTab === 'jobs' ? 'active' : ''}`}
-            onClick={() => setActiveTab('jobs')}
           >
             <i className="fas fa-briefcase"></i>
             <span>Jobs</span>
-          </a>
-          <a href="#applications" className="menu-item">
+          </Link>
+          <Link to="/admin/messages" className="menu-item">
+            <i className="fas fa-envelope"></i>
+            <span>Messages</span>
+          </Link>
+          <Link to="/admin/applications" className="menu-item">
             <i className="fas fa-file-alt"></i>
             <span>Applications</span>
-          </a>
+          </Link>
           
           <div className="menu-category">Settings</div>
-          <a href="#account" className="menu-item">
+          <Link to="/settings" className="menu-item">
             <i className="fas fa-user-cog"></i>
             <span>Account</span>
-          </a>
-          <a href="#security" className="menu-item">
+          </Link>
+          <Link to="/settings" className="menu-item">
             <i className="fas fa-shield-alt"></i>
             <span>Security</span>
-          </a>
-          <a href="#system" className="menu-item">
+          </Link>
+          <Link to="/settings" className="menu-item">
             <i className="fas fa-cog"></i>
             <span>System</span>
-          </a>
+          </Link>
         </div>
       </div>
 

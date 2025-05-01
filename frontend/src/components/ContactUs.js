@@ -10,6 +10,7 @@ function ContactUs() {
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [activeTab, setActiveTab] = useState('general');
   const [activeQuestion, setActiveQuestion] = useState(null);
 
@@ -20,13 +21,26 @@ function ContactUs() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage('');
     
-    // Simulate form submission
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await fetch('http://localhost:5000/api/messages/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Something went wrong');
+      }
+      
       setFormSubmitted(true);
       setFormData({
         name: '',
@@ -39,7 +53,12 @@ function ContactUs() {
       setTimeout(() => {
         setFormSubmitted(false);
       }, 5000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error submitting message:', error);
+      setErrorMessage(error.message || 'Failed to send message. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleQuestion = (index) => {
@@ -184,6 +203,13 @@ function ContactUs() {
               </div>
             ) : (
               <form className="contact-form" onSubmit={handleSubmit}>
+                {errorMessage && (
+                  <div className="error-message">
+                    <i className="fas fa-exclamation-circle"></i>
+                    <p>{errorMessage}</p>
+                  </div>
+                )}
+                
                 <div className="form-group">
                   <label htmlFor="name">Your Name</label>
                   <input
