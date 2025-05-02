@@ -329,20 +329,20 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
           </Link>
           
           <div className="menu-category">Management</div>
-          <Link 
-            to="/admin/users" 
+          <button 
             className={`menu-item ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
           >
             <i className="fas fa-users"></i>
             <span>Users</span>
-          </Link>
-          <Link 
-            to="/admin/jobs" 
+          </button>
+          <button 
             className={`menu-item ${activeTab === 'jobs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('jobs')}
           >
             <i className="fas fa-briefcase"></i>
             <span>Jobs</span>
-          </Link>
+          </button>
           <Link to="/admin/messages" className="menu-item">
             <i className="fas fa-envelope"></i>
             <span>Messages</span>
@@ -615,9 +615,9 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                 <button className="btn btn-secondary">
                   <i className="fas fa-download"></i> Export
                 </button>
-                <a href="/postjob" className="btn btn-primary">
+                <Link to="/postjob" className="btn btn-primary">
                   <i className="fas fa-plus"></i> Post New Job
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -701,15 +701,15 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                         </td>
                         <td>
                           <div className="action-buttons">
-                            <a 
-                              href={`/jobs/${job._id}`}
+                            <Link 
+                              to={`/jobs/${job._id}`}
                               className="action-btn view"
                               title="View Details"
                               target="_blank"
                               rel="noopener noreferrer"
                             >
                               <i className="fas fa-eye"></i>
-                            </a>
+                            </Link>
                             <button 
                               className="action-btn edit"
                               onClick={() => handleEditJob(job._id)}

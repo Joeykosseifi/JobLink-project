@@ -13,6 +13,7 @@ function ContactUs() {
   const [errorMessage, setErrorMessage] = useState('');
   const [activeTab, setActiveTab] = useState('general');
   const [activeQuestion, setActiveQuestion] = useState(null);
+  const [selectedOffice, setSelectedOffice] = useState(0); // Default to Beirut (first office)
 
   const handleChange = (e) => {
     setFormData({
@@ -112,24 +113,32 @@ function ContactUs() {
 
   const officeLocations = [
     {
-      city: "New York",
-      address: "350 Fifth Avenue, New York, NY 10118",
-      phone: "+1 (212) 555-1234",
-      email: "nyc@joblink.com"
+      city: "Beirut",
+      address: "Achrafieh, Charles Malek Avenue, Beirut, Lebanon",
+      phone: "+961 1 999 888",
+      email: "beirut@joblink.com",
+      mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13252.892620296618!2d35.50666621950254!3d33.89016023969546!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f17215880a78f%3A0x729182bae99836a4!2sAchrafieh%2C%20Beirut!5e0!3m2!1sen!2slb!4v1687975245272!5m2!1sen!2slb"
     },
     {
-      city: "San Francisco",
-      address: "85 Second Street, San Francisco, CA 94105",
-      phone: "+1 (415) 555-6789",
-      email: "sf@joblink.com"
+      city: "Jounieh",
+      address: "Kaslik, Main Street, Jounieh, Lebanon",
+      phone: "+961 9 888 777",
+      email: "jounieh@joblink.com",
+      mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13254.294478343322!2d35.61536367373425!3d33.98014367226232!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f40f76ac516c3%3A0x82e077f9f498348!2sKaslik!5e0!3m2!1sen!2slb!4v1687975393518!5m2!1sen!2slb"
     },
     {
-      city: "London",
-      address: "One Canada Square, Canary Wharf, London E14 5AB",
-      phone: "+44 20 7946 0958",
-      email: "london@joblink.com"
+      city: "Jbeil",
+      address: "Old Souk, Jbeil, Lebanon",
+      phone: "+961 7 777 666",
+      email: "jbeil@joblink.com",
+      mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6624.915513446124!2d35.63682312529856!3d34.12140078025358!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x151f5b6e8a77d7ff%3A0xd670580e4c7966a9!2sOld%20Souk%20Jbeil!5e0!3m2!1sen!2slb!4v1687975423423!5m2!1sen!2slb"
     }
   ];
+
+  // Function to handle office card click
+  const handleOfficeClick = (index) => {
+    setSelectedOffice(index);
+  };
 
   return (
     <div className="contact-page">
@@ -282,10 +291,14 @@ function ContactUs() {
         
         {/* Office Locations */}
         <div className="office-locations-section">
-          <h2>Our Offices</h2>
+          <h2>Our Offices in Lebanon</h2>
           <div className="office-cards">
             {officeLocations.map((office, index) => (
-              <div className="office-card" key={index}>
+              <div 
+                className={`office-card ${selectedOffice === index ? 'active' : ''}`} 
+                key={index}
+                onClick={() => handleOfficeClick(index)}
+              >
                 <div className="office-card-header">
                   <h3>{office.city}</h3>
                   <i className="fas fa-building"></i>
@@ -302,21 +315,19 @@ function ContactUs() {
         
         {/* Map Section */}
         <div className="map-section">
-          <h2>Find Us</h2>
+          <h2>Find Us in {officeLocations[selectedOffice].city}</h2>
           <div className="map-container">
-            {/* Embed a static map image as a placeholder */}
             <div className="map-placeholder">
-              <img 
-                src="https://maps.googleapis.com/maps/api/staticmap?center=New+York,NY&zoom=13&size=600x300&maptype=roadmap&markers=color:blue%7Clabel:S%7C40.7128,-74.0060&key=YOUR_API_KEY" 
-                alt="Office Location Map" 
-              />
-              <div className="map-overlay">
-                <p>Interactive map loading...</p>
-                <button className="view-map-btn">
-                  <i className="fas fa-map-marked-alt"></i>
-                  View Full Map
-                </button>
-              </div>
+              <iframe 
+                src={officeLocations[selectedOffice].mapUrl}
+                width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen="" 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title={`${officeLocations[selectedOffice].city} Office Location`}
+              ></iframe>
             </div>
           </div>
         </div>

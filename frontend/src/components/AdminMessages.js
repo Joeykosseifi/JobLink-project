@@ -146,19 +146,37 @@ function AdminMessages() {
               <i className="fas fa-home"></i>
               <span>Overview</span>
             </Link>
+            <Link to="/admin/analytics" className="menu-item">
+              <i className="fas fa-chart-line"></i>
+              <span>Analytics</span>
+            </Link>
             
             <div className="menu-category">Management</div>
-            <Link to="/admin/dashboard" className="menu-item">
+            <Link to="/admin/users" className="menu-item">
               <i className="fas fa-users"></i>
               <span>Users</span>
             </Link>
-            <Link to="/admin/dashboard" className="menu-item">
+            <Link to="/admin/jobs" className="menu-item">
               <i className="fas fa-briefcase"></i>
               <span>Jobs</span>
             </Link>
             <Link to="/admin/messages" className="menu-item active">
               <i className="fas fa-envelope"></i>
               <span>Messages</span>
+            </Link>
+            <Link to="/admin/applications" className="menu-item">
+              <i className="fas fa-file-alt"></i>
+              <span>Applications</span>
+            </Link>
+            
+            <div className="menu-category">Settings</div>
+            <Link to="/settings" className="menu-item">
+              <i className="fas fa-user-cog"></i>
+              <span>Account</span>
+            </Link>
+            <Link to="/settings" className="menu-item">
+              <i className="fas fa-shield-alt"></i>
+              <span>Security</span>
             </Link>
           </div>
         </div>
@@ -188,19 +206,37 @@ function AdminMessages() {
               <i className="fas fa-home"></i>
               <span>Overview</span>
             </Link>
+            <Link to="/admin/analytics" className="menu-item">
+              <i className="fas fa-chart-line"></i>
+              <span>Analytics</span>
+            </Link>
             
             <div className="menu-category">Management</div>
-            <Link to="/admin/dashboard" className="menu-item">
+            <Link to="/admin/users" className="menu-item">
               <i className="fas fa-users"></i>
               <span>Users</span>
             </Link>
-            <Link to="/admin/dashboard" className="menu-item">
+            <Link to="/admin/jobs" className="menu-item">
               <i className="fas fa-briefcase"></i>
               <span>Jobs</span>
             </Link>
             <Link to="/admin/messages" className="menu-item active">
               <i className="fas fa-envelope"></i>
               <span>Messages</span>
+            </Link>
+            <Link to="/admin/applications" className="menu-item">
+              <i className="fas fa-file-alt"></i>
+              <span>Applications</span>
+            </Link>
+            
+            <div className="menu-category">Settings</div>
+            <Link to="/settings" className="menu-item">
+              <i className="fas fa-user-cog"></i>
+              <span>Account</span>
+            </Link>
+            <Link to="/settings" className="menu-item">
+              <i className="fas fa-shield-alt"></i>
+              <span>Security</span>
             </Link>
           </div>
         </div>
@@ -229,19 +265,37 @@ function AdminMessages() {
             <i className="fas fa-home"></i>
             <span>Overview</span>
           </Link>
+          <Link to="/admin/analytics" className="menu-item">
+            <i className="fas fa-chart-line"></i>
+            <span>Analytics</span>
+          </Link>
           
           <div className="menu-category">Management</div>
-          <Link to="/admin/dashboard" className="menu-item">
+          <Link to="/admin/users" className="menu-item">
             <i className="fas fa-users"></i>
             <span>Users</span>
           </Link>
-          <Link to="/admin/dashboard" className="menu-item">
+          <Link to="/admin/jobs" className="menu-item">
             <i className="fas fa-briefcase"></i>
             <span>Jobs</span>
           </Link>
           <Link to="/admin/messages" className="menu-item active">
             <i className="fas fa-envelope"></i>
             <span>Messages</span>
+          </Link>
+          <Link to="/admin/applications" className="menu-item">
+            <i className="fas fa-file-alt"></i>
+            <span>Applications</span>
+          </Link>
+          
+          <div className="menu-category">Settings</div>
+          <Link to="/settings" className="menu-item">
+            <i className="fas fa-user-cog"></i>
+            <span>Account</span>
+          </Link>
+          <Link to="/settings" className="menu-item">
+            <i className="fas fa-shield-alt"></i>
+            <span>Security</span>
           </Link>
         </div>
       </div>

@@ -1,10 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './Home.css';
 
 function Home() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [featuredJobs, setFeaturedJobs] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [jobsError, setJobsError] = useState(null);
+
+  useEffect(() => {
+    const fetchFeaturedJobs = async () => {
+      try {
+        setLoadingJobs(true);
+        // Fetch jobs with the featured flag set to true
+        const response = await axios.get('http://localhost:5000/api/jobs');
+        
+        // Filter for featured jobs and limit to 6
+        const featured = response.data.data.jobs
+          .filter(job => job.featured)
+          .slice(0, 6);
+        
+        // If there are fewer than 6 featured jobs, add some regular jobs
+        if (featured.length < 6) {
+          const regularJobs = response.data.data.jobs
+            .filter(job => !job.featured)
+            .slice(0, 6 - featured.length);
+          
+          setFeaturedJobs([...featured, ...regularJobs]);
+        } else {
+          setFeaturedJobs(featured);
+        }
+        
+        setLoadingJobs(false);
+      } catch (error) {
+        console.error('Error fetching featured jobs:', error);
+        setJobsError('Failed to load featured jobs');
+        setLoadingJobs(false);
+      }
+    };
+
+    fetchFeaturedJobs();
+  }, []);
 
   const handleButtonClick = (destination) => {
     const token = localStorage.getItem('token');
@@ -18,6 +56,10 @@ function Home() {
     }
   };
 
+  const handleJobClick = (jobId) => {
+    navigate(`/jobs/${jobId}`);
+  };
+
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
   };
@@ -28,52 +70,6 @@ function Home() {
     alert(`Thank you for subscribing with: ${email}`);
     setEmail('');
   };
-
-  // Sample featured jobs data
-  const featuredJobs = [
-    {
-      id: 1,
-      title: 'Executive Chef',
-      company: 'Gastronomy Heights Restaurant',
-      location: 'Beirut, Lebanon',
-      type: 'Full-time'
-    },
-    {
-      id: 2,
-      title: 'Restaurant Manager',
-      company: 'The Golden Fork Bistro',
-      location: 'Jounieh, Lebanon',
-      type: 'Full-time'
-    },
-    {
-      id: 3,
-      title: 'Hotel Concierge',
-      company: 'Grand Plaza Hotel',
-      location: 'Byblos, Lebanon',
-      type: 'Full-time'
-    },
-    {
-      id: 4,
-      title: 'Sous Chef',
-      company: 'Ocean Breeze Restaurant',
-      location: 'Tripoli, Lebanon',
-      type: 'Full-time'
-    },
-    {
-      id: 5,
-      title: 'Bartender',
-      company: 'Urban Cocktail Lounge',
-      location: 'Batroun, Lebanon',
-      type: 'Part-time'
-    },
-    {
-      id: 6,
-      title: 'Event Coordinator',
-      company: 'Luxury Resort & Spa',
-      location: 'Sidon, Lebanon',
-      type: 'Full-time'
-    }
-  ];
 
   // Sample testimonials data
   const testimonials = [
@@ -270,23 +266,46 @@ function Home() {
 
       <section className="featured-jobs-section">
         <h2>Featured Hospitality & Restaurant Jobs</h2>
-        <div className="featured-jobs-container">
-          {featuredJobs.map(job => (
-            <div key={job.id} className="job-card" onClick={() => handleButtonClick('/jobs')}>
-              <h3>{job.title}</h3>
-              <div className="job-company">{job.company}</div>
-              <div className="job-details">
-                <span className="job-location">
-                  <i className='bx bx-map'></i> {job.location}
-                </span>
-                <span className="job-type">
-                  <i className='bx bx-briefcase'></i> {job.type}
-                </span>
+        
+        {loadingJobs ? (
+          <div className="featured-jobs-loading">
+            <div className="spinner"></div>
+            <p>Loading featured jobs...</p>
+          </div>
+        ) : jobsError ? (
+          <div className="featured-jobs-error">
+            <i className='bx bx-error-circle'></i>
+            <p>{jobsError}</p>
+          </div>
+        ) : (
+          <div className="featured-jobs-container">
+            {featuredJobs.length > 0 ? (
+              featuredJobs.map(job => (
+                <div key={job._id} className="job-card" onClick={() => handleJobClick(job._id)}>
+                  <h3>{job.title}</h3>
+                  <div className="job-company">{job.company}</div>
+                  <div className="job-details">
+                    <span className="job-location">
+                      <i className='bx bx-map'></i> {job.location}
+                    </span>
+                    <span className="job-type">
+                      <i className='bx bx-briefcase'></i> {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
+                    </span>
+                  </div>
+                  {job.featured && <div className="job-badge featured">Featured</div>}
+                  {job.urgent && <div className="job-badge urgent">Urgent</div>}
+                  <button className="apply-button">View Details</button>
+                </div>
+              ))
+            ) : (
+              <div className="no-jobs-message">
+                <i className='bx bx-info-circle'></i>
+                <p>No featured jobs available currently.</p>
               </div>
-              <button className="apply-button">View Details</button>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        )}
+        
         <button className="see-all-button" onClick={() => handleButtonClick('/jobs')}>
           See All Jobs
         </button>

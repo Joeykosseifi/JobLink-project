@@ -1,17 +1,18 @@
 /* Global Styles */
 :root {
-  --primary-color: #2557a7;
-  --secondary-color: #1e4b8d;
-  --success-color: #28a745;
-  --success-dark: #218838;
-  --text-primary: #2d2d2d;
-  --text-secondary: #4f4f4f;
-  --background-light: #f9fafb;
+  --primary-color: #0A66C2;  /* LinkedIn primary blue */
+  --secondary-color: #004182;  /* LinkedIn darker blue for hover states */
+  --success-color: #057642;  /* LinkedIn green */
+  --success-dark: #046235;  /* LinkedIn darker green */
+  --text-primary: #191919;  /* LinkedIn primary text */
+  --text-secondary: #666666;  /* LinkedIn secondary text */
+  --background-light: #F3F2EF;  /* LinkedIn light background */
   --background-white: #ffffff;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --border-radius: 8px;
+  --border-radius: 10px;
+  --border-radius-pill: 24px; /* LinkedIn pill-shaped buttons */
   --transition: all 0.3s ease;
 }
 
@@ -49,7 +50,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-pill);
   border: none;
   cursor: pointer;
   transition: var(--transition);

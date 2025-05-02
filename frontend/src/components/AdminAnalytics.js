@@ -88,9 +88,9 @@ function AdminAnalytics() {
     console.log("Applications loaded:", applications.length);
     
     fetchAnalyticsData();
-    // We include mockApplications directly since it's a module-level constant
-    // This won't cause re-renders as it never changes
-  }, [fetchAnalyticsData, mockApplications]);
+    // Since mockApplications is a constant defined outside the component,
+    // it doesn't need to be in the dependency array
+  }, [fetchAnalyticsData]);
 
   // Sample data for charts
   const monthlyData = {
@@ -160,11 +160,11 @@ function AdminAnalytics() {
             </Link>
             
             <div className="menu-category">Management</div>
-            <Link to="/admin/dashboard" className="menu-item">
+            <Link to="/admin/users" className="menu-item">
               <i className="fas fa-users"></i>
               <span>Users</span>
             </Link>
-            <Link to="/admin/dashboard" className="menu-item">
+            <Link to="/admin/jobs" className="menu-item">
               <i className="fas fa-briefcase"></i>
               <span>Jobs</span>
             </Link>
@@ -175,6 +175,16 @@ function AdminAnalytics() {
             <Link to="/admin/applications" className="menu-item">
               <i className="fas fa-file-alt"></i>
               <span>Applications</span>
+            </Link>
+            
+            <div className="menu-category">Settings</div>
+            <Link to="/settings" className="menu-item">
+              <i className="fas fa-user-cog"></i>
+              <span>Account</span>
+            </Link>
+            <Link to="/settings" className="menu-item">
+              <i className="fas fa-shield-alt"></i>
+              <span>Security</span>
             </Link>
           </div>
         </div>
@@ -210,11 +220,11 @@ function AdminAnalytics() {
             </Link>
             
             <div className="menu-category">Management</div>
-            <Link to="/admin/dashboard" className="menu-item">
+            <Link to="/admin/users" className="menu-item">
               <i className="fas fa-users"></i>
               <span>Users</span>
             </Link>
-            <Link to="/admin/dashboard" className="menu-item">
+            <Link to="/admin/jobs" className="menu-item">
               <i className="fas fa-briefcase"></i>
               <span>Jobs</span>
             </Link>
@@ -225,6 +235,16 @@ function AdminAnalytics() {
             <Link to="/admin/applications" className="menu-item">
               <i className="fas fa-file-alt"></i>
               <span>Applications</span>
+            </Link>
+            
+            <div className="menu-category">Settings</div>
+            <Link to="/settings" className="menu-item">
+              <i className="fas fa-user-cog"></i>
+              <span>Account</span>
+            </Link>
+            <Link to="/settings" className="menu-item">
+              <i className="fas fa-shield-alt"></i>
+              <span>Security</span>
             </Link>
           </div>
         </div>
@@ -268,11 +288,11 @@ function AdminAnalytics() {
           </Link>
           
           <div className="menu-category">Management</div>
-          <Link to="/admin/dashboard" className="menu-item">
+          <Link to="/admin/users" className="menu-item">
             <i className="fas fa-users"></i>
             <span>Users</span>
           </Link>
-          <Link to="/admin/dashboard" className="menu-item">
+          <Link to="/admin/jobs" className="menu-item">
             <i className="fas fa-briefcase"></i>
             <span>Jobs</span>
           </Link>
@@ -283,6 +303,16 @@ function AdminAnalytics() {
           <Link to="/admin/applications" className="menu-item">
             <i className="fas fa-file-alt"></i>
             <span>Applications</span>
+          </Link>
+          
+          <div className="menu-category">Settings</div>
+          <Link to="/settings" className="menu-item">
+            <i className="fas fa-user-cog"></i>
+            <span>Account</span>
+          </Link>
+          <Link to="/settings" className="menu-item">
+            <i className="fas fa-shield-alt"></i>
+            <span>Security</span>
           </Link>
         </div>
       </div>
