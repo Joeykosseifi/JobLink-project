@@ -36,8 +36,8 @@ function Navbar() {
           const updatedAccounts = savedAccounts.filter(acc => acc.email !== currentAccount.email);
           updatedAccounts.unshift(currentAccount);
           
-          // Keep only the last 5 accounts
-          const limitedAccounts = updatedAccounts.slice(0, 5);
+          // Keep only the last 2 accounts
+          const limitedAccounts = updatedAccounts.slice(0, 2);
           
           setRecentAccounts(limitedAccounts);
           localStorage.setItem('recentAccounts', JSON.stringify(limitedAccounts));
@@ -147,6 +147,12 @@ function Navbar() {
         <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={handleNavLinkClick}>
           <i className="fas fa-envelope"></i> Contact Us
         </Link>
+        
+        {isLoggedIn && (
+          <Link to="/network" className={`nav-link ${isActive('/network') ? 'active' : ''}`} onClick={handleNavLinkClick}>
+            <i className="fas fa-users"></i> My Network
+          </Link>
+        )}
         
         {isLoggedIn && user && user.role === 'admin' && (
           <Link to="/admin/dashboard" className={`admin-link ${isActive('/admin') ? 'active' : ''}`} onClick={handleNavLinkClick}>

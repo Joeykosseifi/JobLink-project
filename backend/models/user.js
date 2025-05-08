@@ -27,6 +27,34 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
+  // Profile fields
+  title: {
+    type: String,
+    trim: true,
+    maxlength: [100, 'Title cannot be more than 100 characters']
+  },
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: [500, 'Bio cannot be more than 500 characters']
+  },
+  profileImage: {
+    type: String,
+    trim: true
+  },
+  // Connection fields
+  connections: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  }],
+  connectionRequests: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  }],
+  pendingConnections: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'User'
+  }],
   settings: {
     emailNotifications: {
       jobAlerts: { type: Boolean, default: true },

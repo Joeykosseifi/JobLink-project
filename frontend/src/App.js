@@ -10,6 +10,8 @@ import Jobs from './components/Jobs';
 import JobDetail from './components/JobDetail';
 import ContactUs from './components/ContactUs';
 import Footer from './components/Footer';
+import NotFound from './components/NotFound';
+import MyNetwork from './components/MyNetwork';
 
 import PostJob from './components/PostJob';
 import AdminDashboard from './components/AdminDashboard';
@@ -43,6 +45,7 @@ const AppContent = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/network" element={<MyNetwork />} />
         <Route path="/postjob" element={<PostJob />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminDashboard activeTab="users" />} />
@@ -52,6 +55,8 @@ const AppContent = () => {
         <Route path="/admin/applications" element={<AdminApplications />} />
         <Route path="/user/account" element={<UserAccount />} />
         <Route path="/settings" element={<Settings />} />
+        {/* Catch-all route for 404 Not Found */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {!hideFooter && <Footer />}
     </div>

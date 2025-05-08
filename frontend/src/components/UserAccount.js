@@ -9,6 +9,9 @@ const UserAccount = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    title: '',
+    bio: '',
+    profileImage: '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -31,6 +34,9 @@ const UserAccount = () => {
       setFormData({
         name: parsedUser.name,
         email: parsedUser.email,
+        title: parsedUser.title || '',
+        bio: parsedUser.bio || '',
+        profileImage: parsedUser.profileImage || '',
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
@@ -77,6 +83,9 @@ const UserAccount = () => {
       console.log('Request body:', {
         name: formData.name,
         email: formData.email,
+        title: formData.title,
+        bio: formData.bio,
+        profileImage: formData.profileImage,
         currentPassword: formData.currentPassword ? '[HIDDEN]' : undefined,
         newPassword: formData.newPassword ? '[HIDDEN]' : undefined
       });
@@ -86,6 +95,9 @@ const UserAccount = () => {
         {
           name: formData.name,
           email: formData.email,
+          title: formData.title,
+          bio: formData.bio,
+          profileImage: formData.profileImage,
           currentPassword: formData.currentPassword || undefined,
           newPassword: formData.newPassword || undefined
         },
@@ -144,7 +156,7 @@ const UserAccount = () => {
     <div className="user-account-page">
       <div className="user-account-container">
         <div className="user-account-header">
-          <h1>My Account</h1>
+          <h1>My Profile</h1>
           <button 
             className="edit-button"
             onClick={() => setIsEditing(!isEditing)}
@@ -163,9 +175,25 @@ const UserAccount = () => {
           </div>
         )}
 
+        <div className="profile-preview">
+          <div className="profile-avatar">
+            {formData.profileImage ? (
+              <img src={formData.profileImage} alt={formData.name} />
+            ) : (
+              <div className="avatar-placeholder">
+                {formData.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <div className="profile-details">
+            <h2>{formData.name}</h2>
+            <p className="profile-title">{formData.title || 'No title specified'}</p>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="user-account-form">
           <div className="form-group">
-            <label>Name</label>
+            <label>Full Name</label>
             <input
               type="text"
               name="name"
@@ -188,8 +216,48 @@ const UserAccount = () => {
             />
           </div>
 
+          <div className="form-group">
+            <label>Professional Title</label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              disabled={!isEditing}
+              placeholder="e.g. Senior Chef, Restaurant Manager"
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Bio</label>
+            <textarea
+              name="bio"
+              value={formData.bio}
+              onChange={handleChange}
+              disabled={!isEditing}
+              placeholder="Tell others about yourself and your professional background"
+              rows={4}
+            ></textarea>
+          </div>
+
+          <div className="form-group">
+            <label>Profile Image URL</label>
+            <input
+              type="text"
+              name="profileImage"
+              value={formData.profileImage}
+              onChange={handleChange}
+              disabled={!isEditing}
+              placeholder="https://example.com/your-image.jpg"
+            />
+          </div>
+
           {isEditing && (
             <>
+              <div className="form-divider">
+                <h3>Change Password</h3>
+              </div>
+
               <div className="form-group">
                 <label>Current Password</label>
                 <input
