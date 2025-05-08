@@ -214,7 +214,9 @@
   padding-top: 0.5rem;
   font-size: 0.875rem;
 }
-
+.sidebar-header{
+  padding-top: 5rem;
+}
 .stat-change.positive {
   color: #38a169;
 }
@@ -751,3 +753,8 @@
 .sidebar-menu button.menu-item.active i {
   color: #ffffff; /* White icon for active items to match LinkedIn */
 } 
+
+
+
+
+

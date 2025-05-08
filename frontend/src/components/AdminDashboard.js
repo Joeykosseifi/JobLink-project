@@ -12,7 +12,7 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
+  // const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [activeTab, setActiveTab] = useState(initialActiveTab); // users or jobs
   const [jobSearch, setJobSearch] = useState('');
   const [jobCategoryFilter, setJobCategoryFilter] = useState('all');
@@ -273,9 +273,9 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
     }
   };
 
-  const toggleSidebar = () => {
-    setSidebarExpanded(!sidebarExpanded);
-  };
+  // const toggleSidebar = () => {
+  //   setSidebarExpanded(!sidebarExpanded);
+  // };
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -307,16 +307,16 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
   return (
     <div className="admin-dashboard">
       {/* Sidebar */}
-      <div className={`admin-sidebar ${sidebarExpanded ? 'expanded' : ''}`}>
+      <div className={`admin-sidebar`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <i className="fas fa-briefcase"></i>
-            <h2>JobLink Admin</h2>
+            <i className="fas fa-user-circle"></i>
+            <h2>Admin</h2>
           </div>
-          <button className="sidebar-toggle" onClick={toggleSidebar}>
+           {/* <button className="sidebar-toggle" onClick={toggleSidebar}>
             <i className={`fas fa-${sidebarExpanded ? 'chevron-left' : 'chevron-right'}`}></i>
-          </button>
-        </div>
+          </button>  */}
+        </div> 
         <div className="sidebar-menu">
           <div className="menu-category">Dashboard</div>
           <Link to="/admin/dashboard" className="menu-item active">

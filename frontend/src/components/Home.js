@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Home.css';
@@ -9,12 +9,59 @@ function Home() {
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [jobsError, setJobsError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchLocation, setSearchLocation] = useState('');
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [showCtaBanner, setShowCtaBanner] = useState(false);
+  const [ctaBannerClosed, setCtaBannerClosed] = useState(false);
+  const [alertEmail, setAlertEmail] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [frequencyPreference, setFrequencyPreference] = useState('daily');
+  const [alertSuccess, setAlertSuccess] = useState(false);
+  
+  // Live stats counters
+  const [jobsCount, setJobsCount] = useState(0);
+  const [seekersCount, setSeekersCount] = useState(0);
+  const [companiesCount, setCompaniesCount] = useState(0);
+  const [liveStatsLoading, setLiveStatsLoading] = useState(true);
+  const liveStatsRef = useRef(null);
+  const countersStarted = useRef(false);
+  
+  // Ref for tracking scroll position
+  const scrollRef = useRef(null);
+
+  // Testimonials
+  const testimonials = [
+    {
+      id: 1,
+      text: "JobLink transformed our hiring process. We've found exceptional talent that perfectly fits our restaurant's culture and requirements.",
+      name: "Sarah Haddad",
+      position: "HR Director",
+      company: "Le Bordeaux Restaurant",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+    },
+    {
+      id: 2,
+      text: "As a chef looking to advance my career, JobLink connected me with opportunities I wouldn't have found elsewhere. The platform is intuitive and effective.",
+      name: "Ahmad Khalil",
+      position: "Executive Chef",
+      company: "Phoenicia Hotel",
+      avatar: "https://randomuser.me/api/portraits/men/35.jpg"
+    },
+    {
+      id: 3,
+      text: "The quality of candidates we receive through JobLink is consistently high. It's become our primary recruitment channel for hospitality positions.",
+      name: "Maya Nassar",
+      position: "Talent Acquisition Manager",
+      company: "Beirut Luxury Hotels Group",
+      avatar: "https://randomuser.me/api/portraits/women/68.jpg"
+    }
+  ];
 
   useEffect(() => {
     const fetchFeaturedJobs = async () => {
       try {
         setLoadingJobs(true);
-        // Fetch jobs with the featured flag set to true
         const response = await axios.get('http://localhost:5000/api/jobs');
         
         // Filter for featured jobs and limit to 6
@@ -42,16 +89,99 @@ function Home() {
     };
 
     fetchFeaturedJobs();
-  }, []);
+    
+    // Auto-rotate testimonials
+    const testimonialInterval = setInterval(() => {
+      setActiveTestimonial(prev => (prev + 1) % testimonials.length);
+    }, 5000);
+    
+    // Check if user has scrolled past a certain point
+    const handleScroll = () => {
+      if (ctaBannerClosed) return;
+      
+      // Show banner after scrolling past 25% of the page
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      
+      if (scrollPosition > windowHeight * 0.25) {
+        setShowCtaBanner(true);
+      } else {
+        setShowCtaBanner(false);
+      }
+      
+      // Check if live stats section is in view to start counters
+      if (liveStatsRef.current && !countersStarted.current) {
+        const liveStatsTop = liveStatsRef.current.getBoundingClientRect().top;
+        const liveStatsBottom = liveStatsRef.current.getBoundingClientRect().bottom;
+        
+        if (liveStatsTop < window.innerHeight && liveStatsBottom > 0) {
+          fetchLiveStats();
+          countersStarted.current = true;
+        }
+      }
+    };
+    
+    // Add scroll event listener
+    window.addEventListener('scroll', handleScroll);
+    
+    // Initial check for visibility
+    handleScroll();
+    
+    return () => {
+      clearInterval(testimonialInterval);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [testimonials.length, ctaBannerClosed]);
+
+  // Fetch live stats from API
+  const fetchLiveStats = async () => {
+    try {
+      setLiveStatsLoading(true);
+      const response = await axios.get('http://localhost:5000/api/stats');
+      
+      if (response.data && response.data.success) {
+        const stats = response.data.data;
+        animateCounters(stats.jobs, stats.seekers, stats.companies);
+      } else {
+        // Fallback to sample data if API format is unexpected
+        animateCounters(2450, 3200, 350);
+      }
+    } catch (error) {
+      console.error('Error fetching live stats:', error);
+      // Fallback to sample data if API fails
+      animateCounters(2450, 3200, 350);
+    } finally {
+      setLiveStatsLoading(false);
+    }
+  };
+  
+  // Animate counters with real data
+  const animateCounters = (jobsTarget, seekersTarget, companiesTarget) => {
+    const duration = 2000; // Animation duration in ms
+    let startTime = null;
+    
+    const step = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      
+      setJobsCount(Math.floor(progress * jobsTarget));
+      setSeekersCount(Math.floor(progress * seekersTarget));
+      setCompaniesCount(Math.floor(progress * companiesTarget));
+      
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    
+    window.requestAnimationFrame(step);
+  };
 
   const handleButtonClick = (destination) => {
     const token = localStorage.getItem('token');
     
     if (!token) {
-      // If not logged in, redirect to sign up
       navigate('/signup');
     } else {
-      // If logged in, navigate to the respective component
       navigate(destination);
     }
   };
@@ -66,175 +196,196 @@ function Home() {
 
   const handleSubscribe = (e) => {
     e.preventDefault();
-    // Handle subscription logic here
     alert(`Thank you for subscribing with: ${email}`);
     setEmail('');
   };
 
-  // Sample testimonials data
-  const testimonials = [
-    {
-      id: 1,
-      name: 'John Doe',
-      role: 'Software Developer',
-      text: 'JobLink helped me find my dream job within weeks! The platform is intuitive and connects you with quality employers.',
-      avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-    },
-    {
-      id: 2,
-      name: 'Sarah Smith',
-      role: 'HR Manager',
-      text: 'As a recruiter, JobLink makes it easy to find qualified candidates. The filtering options save us so much time!',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
+  const handleSearch = (e) => {
+    e.preventDefault();
+    navigate(`/jobs?search=${searchTerm}&location=${searchLocation}`);
+  };
+  
+  const handleTestimonialDotClick = (index) => {
+    setActiveTestimonial(index);
+  };
+  
+  const handleCloseBanner = () => {
+    setCtaBannerClosed(true);
+    setShowCtaBanner(false);
+  };
+  
+  const handleAlertEmailChange = (e) => {
+    setAlertEmail(e.target.value);
+  };
+  
+  const handleCategoryChange = (category) => {
+    if (selectedCategories.includes(category)) {
+      setSelectedCategories(selectedCategories.filter(c => c !== category));
+    } else {
+      setSelectedCategories([...selectedCategories, category]);
     }
-  ];
+  };
+  
+  const handleFrequencyChange = (e) => {
+    setFrequencyPreference(e.target.value);
+  };
+  
+  const handleAlertSignup = (e) => {
+    e.preventDefault();
+    
+    // Here you would typically make an API call to save the alert preferences
+    console.log({
+      email: alertEmail,
+      categories: selectedCategories,
+      frequency: frequencyPreference
+    });
+    
+    // Show success message
+    setAlertSuccess(true);
+    
+    // Reset form after 3 seconds
+    setTimeout(() => {
+      setAlertEmail('');
+      setSelectedCategories([]);
+      setFrequencyPreference('daily');
+      setAlertSuccess(false);
+    }, 3000);
+  };
 
-  // Statistics data
-  const stats = [
-    { label: 'Active Jobs', value: '2,500+' },
-    { label: 'Companies', value: '1,200+' },
-    { label: 'Job Seekers', value: '15,000+' },
-    { label: 'Success Rate', value: '92%' }
-  ];
-
-  // Job categories data
+  // Professional job categories
   const jobCategories = [
-    { 
-      id: 1, 
-      title: 'Kitchen Staff', 
-      icon: 'bx bx-bowl-hot',
-      description: 'Chef, Line Cook, Pastry Chef', 
-      count: 450 
-    },
-    { 
-      id: 2, 
-      title: 'Restaurant Service', 
-      icon: 'bx bx-restaurant',
-      description: 'Waiter, Host, Sommelier', 
-      count: 380 
-    },
-    { 
-      id: 3, 
-      title: 'Hotel Operations', 
-      icon: 'bx bx-hotel',
-      description: 'Front Desk, Concierge, Housekeeping', 
-      count: 320 
-    },
-    { 
-      id: 4, 
-      title: 'Catering & Events', 
-      icon: 'bx bx-calendar-event',
-      description: 'Event Planner, Catering Manager', 
-      count: 210 
-    },
-    { 
-      id: 5, 
-      title: 'Bar Service', 
-      icon: 'bx bx-drink',
-      description: 'Bartender, Barista, Barback', 
-      count: 175 
-    },
-    { 
-      id: 6, 
-      title: 'Food Delivery', 
-      icon: 'bx bx-cycling',
-      description: 'Driver, Dispatcher, Coordinator', 
-      count: 140 
-    },
-    { 
-      id: 7, 
-      title: 'Cafe & Coffee Shops', 
-      icon: 'bx bx-coffee', 
-      description: 'Barista, Counter Staff, Baker',
-      count: 165 
-    },
-    { 
-      id: 8, 
-      title: 'Resort & Leisure', 
-      icon: 'bx bx-spa',
-      description: 'Spa Therapist, Recreation Staff', 
-      count: 120 
-    }
+    { id: 1, title: 'Kitchen Operations', icon: 'bx bx-restaurant', count: 450 },
+    { id: 2, title: 'Guest Services', icon: 'bx bx-user-voice', count: 380 },
+    { id: 3, title: 'Hospitality Management', icon: 'bx bx-building-house', count: 320 },
+    { id: 4, title: 'Event Planning', icon: 'bx bx-calendar', count: 210 },
+    { id: 5, title: 'Food & Beverage', icon: 'bx bx-dish', count: 175 },
+    { id: 6, title: 'Hospitality Technology', icon: 'bx bx-devices', count: 140 }
   ];
 
-  // How it works steps
-  const howItWorksSteps = [
-    {
-      id: 1,
-      title: 'Create an Account',
-      description: 'Sign up as a job seeker or employer with your details',
-      icon: 'bx bx-user-plus'
-    },
-    {
-      id: 2,
-      title: 'Complete Your Profile',
-      description: 'Add your experience, skills, and preferences',
-      icon: 'bx bx-edit'
-    },
-    {
-      id: 3,
-      title: 'Search & Apply',
-      description: 'Browse jobs, or post opportunities, and connect',
-      icon: 'bx bx-search-alt'
-    },
-    {
-      id: 4,
-      title: 'Get Hired',
-      description: 'Interview and land your ideal hospitality position',
-      icon: 'bx bx-check-circle'
-    }
-  ];
-
-  // Top employers
-  const topEmployers = [
-    { id: 1, name: 'Phoenicia Hotel', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e6/Phoenicia_Hotel_Beirut_Logo.svg/320px-Phoenicia_Hotel_Beirut_Logo.svg.png' },
-    { id: 2, name: 'Em Sherif', logo: 'https://emsherif.com/assets/img/logo-dark.png' },
-    { id: 3, name: 'Le Gray Hotel', logo: 'https://www.legray.com/images/logo.png' },
-    { id: 4, name: 'Babel', logo: 'https://babel.com.lb/images/logo.png' },
-    { id: 5, name: 'Beirut Marriott', logo: 'https://www.marriott.com/images/logo.png' },
-    { id: 6, name: 'Casper & Gambini\'s', logo: 'https://caspergambinis.com/images/logo.png' }
+  // Industry statistics
+  const stats = [
+    { label: 'Open Positions', value: '2,500+' },
+    { label: 'Partner Companies', value: '1,200+' },
+    { label: 'Professionals Connected', value: '15,000+' },
+    { label: 'Hiring Rate', value: '92%' }
   ];
 
   return (
-    <div className="home-container">
-      <section className="hero-section">
-        <h1>Welcome to JobLink</h1>
-        <p>Connect with opportunities</p>
-        <div className="home-buttons">
-          <button 
-            onClick={() => handleButtonClick('/postjob')} 
-            className="action-button post-job-button"
-          >
-            Post a Job
-          </button>
-          <button 
-            onClick={() => handleButtonClick('/jobs')} 
-            className="action-button search-jobs-button"
-          >
-            Search for Jobs
-          </button>
-        </div>
-      </section>
-
-      <section className="job-categories-section">
-        <div className="section-header">
-          <h2>Explore Job Categories</h2>
-          <p>Browse jobs across Lebanon's top hospitality sectors</p>
-        </div>
-        <div className="categories-container">
-          {jobCategories.map(category => (
-            <div key={category.id} className="category-card" onClick={() => handleButtonClick('/jobs')}>
-              <div className="category-icon">
-                <i className={category.icon}></i>
-              </div>
-              <h3>{category.title}</h3>
-              <p className="category-description">{category.description}</p>
-              <div className="category-count">{category.count} jobs</div>
+    <div className="home-container" ref={scrollRef}>
+      {/* Sticky CTA Banner */}
+      {showCtaBanner && (
+        <div className="sticky-cta-banner">
+          <div className="cta-banner-content">
+            <div className="cta-banner-text">
+              <h3>Ready to advance your hospitality career?</h3>
+              <p>Join thousands of professionals finding their perfect job match.</p>
             </div>
-          ))}
+            <div className="cta-banner-buttons">
+              <button onClick={() => navigate('/signup')} className="cta-button signup-button">
+                Create Account
+              </button>
+              <button onClick={() => navigate('/postjob')} className="cta-button post-job-cta-button">
+                Post a Job
+              </button>
+            </div>
+          </div>
+          <button className="cta-banner-close" onClick={handleCloseBanner}>
+            <i className='bx bx-x'></i>
+          </button>
+        </div>
+      )}
+      
+      {/* Modern Hero Section with Search */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1>Connecting Hospitality Professionals</h1>
+          <p>Find your next career opportunity in Lebanon's hospitality industry</p>
+          
+          <form className="search-form" onSubmit={handleSearch}>
+            <div className="search-inputs">
+              <div className="search-input-group">
+                <i className='bx bx-search'></i>
+                <input 
+                  type="text" 
+                  placeholder="Job title or keyword" 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <div className="search-input-group">
+                <i className='bx bx-map'></i>
+                <input 
+                  type="text" 
+                  placeholder="Location" 
+                  value={searchLocation}
+                  onChange={(e) => setSearchLocation(e.target.value)}
+                />
+              </div>
+              <button type="submit" className="search-button">Find Jobs</button>
+            </div>
+          </form>
+          
+          <div className="home-buttons">
+            <button 
+              onClick={() => handleButtonClick('/postjob')} 
+              className="action-button post-job-button"
+            >
+              Post a Job
+            </button>
+            <button 
+              onClick={() => handleButtonClick('/jobs')} 
+              className="action-button search-jobs-button"
+            >
+              Browse All Jobs
+            </button>
+          </div>
         </div>
       </section>
 
+      {/* Live Job Stats Section */}
+      <section className="live-stats-section" ref={liveStatsRef}>
+        <div className="live-stats-container">
+          <div className="live-stats-header">
+            <h2>Platform Activity</h2>
+            <div className="live-indicator">
+              <span className="pulse-dot"></span>
+              Live
+            </div>
+          </div>
+          {liveStatsLoading ? (
+            <div className="live-stats-loading">
+              <div className="spinner"></div>
+              <p>Loading live statistics...</p>
+            </div>
+          ) : (
+            <div className="live-stats-grid">
+              <div className="live-stat-card">
+                <div className="live-stat-icon">
+                  <i className='bx bx-briefcase'></i>
+                </div>
+                <div className="live-stat-count">{jobsCount}</div>
+                <div className="live-stat-label">Jobs Posted</div>
+              </div>
+              <div className="live-stat-card">
+                <div className="live-stat-icon">
+                  <i className='bx bx-user-plus'></i>
+                </div>
+                <div className="live-stat-count">{seekersCount}</div>
+                <div className="live-stat-label">Job Seekers</div>
+              </div>
+              <div className="live-stat-card">
+                <div className="live-stat-icon">
+                  <i className='bx bx-building-house'></i>
+                </div>
+                <div className="live-stat-count">{companiesCount}</div>
+                <div className="live-stat-label">Companies Hiring</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Key Metrics Section */}
       <section className="stats-section">
         <div className="stats-container">
           {stats.map((stat, index) => (
@@ -246,26 +397,12 @@ function Home() {
         </div>
       </section>
 
-      <section className="how-it-works-section">
-        <div className="section-header">
-          <h2>How JobLink Works</h2>
-          <p>Your path to success in Lebanon's hospitality industry</p>
-        </div>
-        <div className="steps-container">
-          {howItWorksSteps.map(step => (
-            <div key={step.id} className="step-card">
-              <div className="step-icon">
-                <i className={step.icon}></i>
-              </div>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
+      {/* Featured Jobs Section */}
       <section className="featured-jobs-section">
-        <h2>Featured Hospitality & Restaurant Jobs</h2>
+        <div className="section-header">
+          <h2>Featured Opportunities</h2>
+          <p>Discover top positions in Lebanon's hospitality sector</p>
+        </div>
         
         {loadingJobs ? (
           <div className="featured-jobs-loading">
@@ -282,7 +419,11 @@ function Home() {
             {featuredJobs.length > 0 ? (
               featuredJobs.map(job => (
                 <div key={job._id} className="job-card" onClick={() => handleJobClick(job._id)}>
-                  <h3>{job.title}</h3>
+                  <div className="job-card-header">
+                    <h3>{job.title}</h3>
+                    {job.featured && <div className="job-badge featured">Featured</div>}
+                    {job.urgent && <div className="job-badge urgent">Urgent</div>}
+                  </div>
                   <div className="job-company">{job.company}</div>
                   <div className="job-details">
                     <span className="job-location">
@@ -291,9 +432,12 @@ function Home() {
                     <span className="job-type">
                       <i className='bx bx-briefcase'></i> {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
                     </span>
+                    {job.salary && (
+                      <span className="job-salary">
+                        <i className='bx bx-dollar'></i> {job.salary}
+                      </span>
+                    )}
                   </div>
-                  {job.featured && <div className="job-badge featured">Featured</div>}
-                  {job.urgent && <div className="job-badge urgent">Urgent</div>}
                   <button className="apply-button">View Details</button>
                 </div>
               ))
@@ -311,48 +455,188 @@ function Home() {
         </button>
       </section>
 
-      <section className="top-employers-section">
+      {/* Job Categories Section */}
+      <section className="job-categories-section">
         <div className="section-header">
-          <h2>Top Hospitality Employers</h2>
-          <p>Leading establishments in Lebanon's food service and accommodation sectors</p>
+          <h2>Explore by Category</h2>
+          <p>Discover opportunities across major hospitality sectors</p>
         </div>
-        <div className="employers-container">
-          {topEmployers.map(employer => (
-            <div key={employer.id} className="employer-card">
-              <div className="employer-logo">
-                <i className="bx bx-building-house"></i>
+        <div className="categories-container">
+          {jobCategories.map(category => (
+            <div key={category.id} className="category-card" onClick={() => handleButtonClick('/jobs')}>
+              <div className="category-icon">
+                <i className={category.icon}></i>
               </div>
-              <h3>{employer.name}</h3>
+              <h3>{category.title}</h3>
+              <div className="category-count">{category.count} jobs</div>
             </div>
           ))}
         </div>
       </section>
-
-      <section className="testimonials-section">
-        <h2>What People Say</h2>
-        <div className="testimonials-container">
-          {testimonials.map(testimonial => (
-            <div key={testimonial.id} className="testimonial-card">
-              <div className="testimonial-avatar">
-                <img src={testimonial.avatar} alt={testimonial.name} />
+      
+      {/* Job Alerts Signup Section */}
+      <section className="job-alerts-section">
+        <div className="alerts-container">
+          <div className="alerts-content">
+            <div className="alerts-header">
+              <div className="alerts-icon">
+                <i className='bx bx-bell'></i>
               </div>
-              <div className="testimonial-content">
-                <p className="testimonial-text">"{testimonial.text}"</p>
-                <div className="testimonial-author">
-                  <h4>{testimonial.name}</h4>
-                  <p>{testimonial.role}</p>
+              <div>
+                <h2>Stay Ahead with Job Alerts</h2>
+                <p>Get personalized job notifications delivered straight to your inbox</p>
+              </div>
+            </div>
+            
+            {alertSuccess ? (
+              <div className="alert-success">
+                <i className='bx bx-check-circle'></i>
+                <p>Thank you! Your job alert preferences have been saved.</p>
+              </div>
+            ) : (
+              <form className="alerts-form" onSubmit={handleAlertSignup}>
+                <div className="alerts-form-row">
+                  <div className="alert-input-group">
+                    <label htmlFor="alertEmail">Email Address</label>
+                    <input 
+                      type="email" 
+                      id="alertEmail"
+                      placeholder="Enter your email" 
+                      value={alertEmail}
+                      onChange={handleAlertEmailChange}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="alert-input-group">
+                    <label>Alert Frequency</label>
+                    <select 
+                      value={frequencyPreference} 
+                      onChange={handleFrequencyChange}
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="instant">Instant</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="alert-categories">
+                  <label>Select Job Categories (Choose at least one)</label>
+                  <div className="category-checkboxes">
+                    {jobCategories.map(category => (
+                      <div key={category.id} className="category-checkbox">
+                        <input 
+                          type="checkbox" 
+                          id={`category-${category.id}`}
+                          checked={selectedCategories.includes(category.id)}
+                          onChange={() => handleCategoryChange(category.id)}
+                        />
+                        <label htmlFor={`category-${category.id}`}>
+                          <i className={category.icon}></i>
+                          {category.title}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="alerts-form-footer">
+                  <p className="alert-privacy">We respect your privacy and will only send relevant job opportunities.</p>
+                  <button type="submit" className="alert-submit-button" disabled={selectedCategories.length === 0 || !alertEmail}>
+                    Create Job Alert
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </section>
+      
+      {/* Testimonials Slider Section */}
+      <section className="testimonials-section">
+        <div className="section-header">
+          <h2>What Our Users Say</h2>
+          <p>Hear from employers and job seekers who've found success with JobLink</p>
+        </div>
+        
+        <div className="testimonials-slider">
+          <div className="testimonials-wrapper" style={{ transform: `translateX(-${activeTestimonial * 100}%)` }}>
+            {testimonials.map(testimonial => (
+              <div key={testimonial.id} className="testimonial-slide">
+                <div className="testimonial-content">
+                  <div className="testimonial-quote">
+                    <i className='bx bxs-quote-alt-left quote-icon'></i>
+                    <p>{testimonial.text}</p>
+                  </div>
+                  <div className="testimonial-author">
+                    <div className="author-avatar">
+                      <img src={testimonial.avatar} alt={testimonial.name} />
+                    </div>
+                    <div className="author-info">
+                      <h4>{testimonial.name}</h4>
+                      <p>{testimonial.position}</p>
+                      <p className="company">{testimonial.company}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          
+          <div className="testimonial-dots">
+            {testimonials.map((_, index) => (
+              <button 
+                key={index} 
+                className={`testimonial-dot ${index === activeTestimonial ? 'active' : ''}`}
+                onClick={() => handleTestimonialDotClick(index)}
+                aria-label={`Testimonial ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
+      {/* Why Choose Us Section */}
+      <section className="why-choose-us-section">
+        <div className="section-header">
+          <h2>Why Choose JobLink</h2>
+          <p>The leading hospitality recruitment platform in Lebanon</p>
+        </div>
+        
+        <div className="features-container">
+          <div className="feature-card">
+            <div className="feature-icon">
+              <i className='bx bx-check-shield'></i>
+            </div>
+            <h3>Verified Employers</h3>
+            <p>All employers on our platform are thoroughly vetted to ensure legitimacy and quality.</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <i className='bx bx-time'></i>
+            </div>
+            <h3>Real-time Updates</h3>
+            <p>Receive instant notifications about new opportunities matching your profile.</p>
+          </div>
+          
+          <div className="feature-card">
+            <div className="feature-icon">
+              <i className='bx bx-trending-up'></i>
+            </div>
+            <h3>Career Growth</h3>
+            <p>Connect with employers who value professional development and advancement.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
       <section className="newsletter-section">
         <div className="newsletter-container">
           <div className="newsletter-content">
-            <h2>Stay Updated on Hospitality Opportunities</h2>
-            <p>Subscribe to receive job alerts and industry news from Lebanon's restaurant and hotel sectors</p>
+            <h2>Stay Updated on New Opportunities</h2>
+            <p>Subscribe to receive job alerts tailored to your professional interests</p>
             <form className="newsletter-form" onSubmit={handleSubscribe}>
               <input 
                 type="email" 

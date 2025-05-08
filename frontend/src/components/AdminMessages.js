@@ -136,8 +136,8 @@ function AdminMessages() {
         <div className="admin-sidebar">
           <div className="sidebar-header">
             <div className="sidebar-logo">
-              <i className="fas fa-briefcase"></i>
-              <h2>JobLink Admin</h2>
+              <i className="fas fa-user-circle"></i>
+                <h2>Admin</h2>
             </div>
           </div>
           <div className="sidebar-menu">
@@ -196,8 +196,8 @@ function AdminMessages() {
         <div className="admin-sidebar">
           <div className="sidebar-header">
             <div className="sidebar-logo">
-              <i className="fas fa-briefcase"></i>
-              <h2>JobLink Admin</h2>
+              <i className="fas fa-user-circle"></i>
+              <h2>Admin</h2>
             </div>
           </div>
           <div className="sidebar-menu">
@@ -255,8 +255,8 @@ function AdminMessages() {
       <div className="admin-sidebar">
         <div className="sidebar-header">
           <div className="sidebar-logo">
-            <i className="fas fa-briefcase"></i>
-            <h2>JobLink Admin</h2>
+            <i className="fas fa-user-circle"></i>
+            <h2>Admin</h2>
           </div>
         </div>
         <div className="sidebar-menu">

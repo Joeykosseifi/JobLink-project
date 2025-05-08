@@ -19,6 +19,7 @@ import AdminApplications from './components/AdminApplications';
 import UserAccount from './components/UserAccount';
 import Settings from './components/Settings';
 import './App.css';
+import ScrollToTop from './components/ScrollToTop';
 
 // Helper component to conditionally render footer
 const AppContent = () => {
@@ -60,6 +61,7 @@ const AppContent = () => {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AppContent />
     </Router>
   );
