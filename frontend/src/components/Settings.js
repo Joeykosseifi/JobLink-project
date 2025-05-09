@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Settings.css';
+import { useNotification } from './NotificationContext';
+import { useDialog } from './DialogContext';
 
 const Settings = () => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
+  const { showConfirmDialog } = useDialog();
+  
   const [settings, setSettings] = useState({
     emailNotifications: {
       jobAlerts: true,
@@ -51,7 +56,6 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState('notifications');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -81,12 +85,13 @@ const Settings = () => {
       } catch (err) {
         console.error('Error fetching settings:', err);
         setError('Failed to load settings');
+        showNotification('Failed to load settings', 'error');
         setLoading(false);
       }
     };
 
     fetchSettings();
-  }, [navigate]);
+  }, [navigate, showNotification]);
 
   const handleToggle = (category, setting) => {
     setSettings(prev => ({
@@ -133,11 +138,11 @@ const Settings = () => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setError('New passwords do not match');
+      showNotification('New passwords do not match', 'error');
       return;
     }
 
     setError(null);
-    setSuccessMessage('');
 
     try {
       const token = localStorage.getItem('token');
@@ -152,14 +157,16 @@ const Settings = () => {
         }
       );
 
-      setSuccessMessage('Password updated successfully!');
+      showNotification('Password updated successfully!', 'success');
       setPasswordData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       });
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update password');
+      const errorMessage = err.response?.data?.message || 'Failed to update password';
+      setError(errorMessage);
+      showNotification(errorMessage, 'error');
     }
   };
 
@@ -228,7 +235,6 @@ const Settings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    setSuccessMessage('');
 
     try {
       const token = localStorage.getItem('token');
@@ -248,11 +254,40 @@ const Settings = () => {
         }
       );
 
-      setSuccessMessage('Settings updated successfully!');
+      showNotification('Settings saved successfully!', 'success');
     } catch (err) {
-      console.error('Error updating settings:', err);
-      setError(err.response?.data?.message || 'Failed to update settings');
+      const errorMessage = err.response?.data?.message || 'Failed to save settings';
+      setError(errorMessage);
+      showNotification(errorMessage, 'error');
     }
+  };
+
+  const handleDeleteAccount = () => {
+    showConfirmDialog({
+      title: 'Delete Account',
+      message: 'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.',
+      confirmText: 'Delete Account',
+      cancelText: 'Cancel',
+      confirmButtonClass: 'btn-danger',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await axios.delete('http://localhost:5000/api/settings/account', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          showNotification('Your account has been deleted successfully', 'success');
+          navigate('/');
+        } catch (err) {
+          const errorMessage = err.response?.data?.message || 'Failed to delete account';
+          showNotification(errorMessage, 'error');
+        }
+      }
+    });
   };
 
   if (loading) {
@@ -264,17 +299,14 @@ const Settings = () => {
       <div className="settings-container">
         <div className="settings-header">
           <h1>Account Settings</h1>
-          {successMessage && (
-            <div className="success-message">
-              <i className="fas fa-check-circle"></i> {successMessage}
             </div>
-          )}
+
           {error && (
-            <div className="error-message">
-              <i className="fas fa-exclamation-circle"></i> {error}
+          <div className="error-banner">
+            <i className="fas fa-exclamation-circle"></i>
+            <p>{error}</p>
             </div>
           )}
-        </div>
 
         <div className="settings-tabs">
           <button 
@@ -871,6 +903,9 @@ const Settings = () => {
           <div className="settings-actions">
             <button type="submit" className="save-button">
               <i className="fas fa-save"></i> Save Changes
+            </button>
+            <button type="button" className="delete-button" onClick={handleDeleteAccount}>
+              <i className="fas fa-trash"></i> Delete Account
             </button>
           </div>
         </form>

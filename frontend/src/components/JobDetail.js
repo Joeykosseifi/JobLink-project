@@ -2,12 +2,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import './JobDetail.css';
+import { useNotification } from './NotificationContext';
+import { useDialog } from './DialogContext';
 
 function JobDetail() {
   const { id } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { showNotification } = useNotification();
+  const { showConfirmDialog } = useDialog();
 
   const fetchJob = useCallback(async () => {
     setLoading(true);
@@ -18,9 +22,10 @@ function JobDetail() {
     } catch (error) {
       console.error('Error fetching job details:', error);
       setError('Failed to load job details. Please try again later.');
+      showNotification('Failed to load job details. Please try again later.', 'error');
       setLoading(false);
     }
-  }, [id]);
+  }, [id, showNotification]);
 
   useEffect(() => {
     fetchJob();
@@ -29,6 +34,45 @@ function JobDetail() {
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const handleApplyNow = () => {
+    // Check if user is logged in first
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showNotification('Please login to apply for this job', 'warning');
+      return;
+    }
+
+    showConfirmDialog({
+      title: 'Apply for Job',
+      message: `Are you sure you want to apply for ${job.title} at ${job.company}?`,
+      confirmText: 'Apply',
+      cancelText: 'Cancel',
+      confirmButtonClass: 'btn-primary',
+      onConfirm: () => {
+        // Here you would handle the application submission logic
+        // For now, we're just showing a notification
+        showNotification('Your application has been submitted successfully!', 'success');
+      }
+    });
+  };
+
+  const handleShareJob = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: `${job.title} at ${job.company}`,
+        text: `Check out this job: ${job.title} at ${job.company}`,
+        url: window.location.href
+      })
+        .then(() => showNotification('Job shared successfully!', 'success'))
+        .catch((error) => console.log('Error sharing:', error));
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => showNotification('Job URL copied to clipboard!', 'info'))
+        .catch(() => showNotification('Failed to copy URL', 'error'));
+    }
   };
 
   if (loading) {
@@ -235,7 +279,7 @@ function JobDetail() {
               </div>
             )}
           </div>
-          <button className="apply-now-btn">
+          <button className="apply-now-btn" onClick={handleApplyNow}>
             <i className='bx bx-send'></i> Apply Now
           </button>
         </div>
@@ -244,7 +288,7 @@ function JobDetail() {
           <a href="/jobs" className="back-to-jobs-btn">
             <i className='bx bx-arrow-back'></i> Back to Jobs
           </a>
-          <button className="share-job-btn">
+          <button className="share-job-btn" onClick={handleShareJob}>
             <i className='bx bx-share-alt'></i> Share Job
           </button>
         </div>

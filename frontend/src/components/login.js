@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import './login.css';
+import { useNotification } from './NotificationContext';
 
 function Login() {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -28,6 +30,8 @@ function Login() {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
         
+        showNotification('Login successful! Redirecting...', 'success');
+        
         // If user is admin, redirect to admin dashboard, otherwise go to home
         if (response.data.data.user.role === 'admin') {
           navigate('/admin/dashboard');
@@ -36,13 +40,18 @@ function Login() {
         }
       } else {
         setError('Invalid response from server');
+        showNotification('Invalid response from server', 'error');
       }
     } catch (error) {
       console.error('Error logging in:', error);
       if (error.response) {
-        setError(error.response.data.message || 'Invalid email or password');
+        const errorMessage = error.response.data.message || 'Invalid email or password';
+        setError(errorMessage);
+        showNotification(errorMessage, 'error');
       } else {
-        setError('Network error. Please try again later.');
+        const errorMessage = 'Network error. Please try again later.';
+        setError(errorMessage);
+        showNotification(errorMessage, 'error');
       }
     }
   };

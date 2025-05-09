@@ -1,7 +1,24 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useNotification } from './NotificationContext';
 
-const NotFound = () => {
+const NotFound = ({ customMessage }) => {
+  const { showNotification } = useNotification();
+  const notificationShown = useRef(false);
+
+  useEffect(() => {
+    // Only show the notification if it hasn't been shown already
+    if (!notificationShown.current) {
+      const notificationMessage = customMessage || 
+        'Page not found. The URL you are trying to access does not exist.';
+      
+      showNotification(notificationMessage, 'error');
+      
+      // Mark that we've shown the notification
+      notificationShown.current = true;
+    }
+  }, [showNotification, customMessage]);
+
   return (
     <div className="not-found-container" style={{ 
       textAlign: 'center', 
@@ -15,7 +32,7 @@ const NotFound = () => {
       <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>404</h1>
       <h2>Page Not Found</h2>
       <p style={{ marginBottom: '30px' }}>
-        We're sorry, the page you requested could not be found.
+        {customMessage || "We're sorry, the page you requested could not be found."}
       </p>
       <Link 
         to="/" 

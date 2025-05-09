@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './AdminDashboard.css';
+import { useNotification } from './NotificationContext';
+import { useDialog } from './DialogContext';
+import { useEditDialog } from './EditDialogContext';
 
 function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
   const [users, setUsers] = useState([]);
@@ -20,6 +23,11 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
   const [currentJobPage, setCurrentJobPage] = useState(1);
   const usersPerPage = 5;
   const jobsPerPage = 5;
+  
+  // Use the notification and dialog context hooks
+  const { showNotification } = useNotification();
+  const { showConfirmDialog } = useDialog();
+  const { showEditDialog } = useEditDialog();
 
   // Job categories for filter
   const jobCategories = [
@@ -115,15 +123,22 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
         throw new Error('User not found');
       }
 
-      const newRole = prompt('Enter new role (user/employer/admin):', user.role);
-      if (!newRole) {
-        return; // User cancelled
-      }
-
+      showEditDialog({
+        title: 'Edit User Role',
+        fields: [
+          {
+            name: 'role',
+            label: 'Role',
+            required: true
+          }
+        ],
+        initialValues: { role: user.role },
+        onSubmit: async (values) => {
+          try {
       const token = localStorage.getItem('token');
       await axios.patch(
             `http://localhost:5000/api/admin/users/${userId}`,
-        { role: newRole },
+              { role: values.role },
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -132,19 +147,26 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
       );
 
       await fetchUsers(); // Refresh the list
-      alert('User updated successfully!');
+            showNotification('User updated successfully!');
+          } catch (err) {
+            console.error('Error updating user:', err);
+            showNotification(err.response?.data?.message || 'Failed to update user', 'error');
+          }
+        }
+      });
     } catch (err) {
-      console.error('Error updating user:', err);
-      alert(err.response?.data?.message || 'Failed to update user');
+      console.error('Error preparing to edit user:', err);
+      showNotification('Error preparing to edit user', 'error');
     }
-  }, [users, fetchUsers]);
+  }, [users, fetchUsers, showEditDialog, showNotification]);
 
   const handleDeleteUser = useCallback(async (userId) => {
     try {
-      if (!window.confirm('Are you sure you want to delete this user?')) {
-        return;
-      }
-
+      showConfirmDialog({
+        title: 'Delete User',
+        message: 'Are you sure you want to delete this user? This action cannot be undone.',
+        onConfirm: async () => {
+          try {
       const token = localStorage.getItem('token');
       await axios.delete(`http://localhost:5000/api/admin/users/${userId}`, {
         headers: {
@@ -161,28 +183,35 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
         activeUsers: prev.activeUsers - (users.find(u => u._id === userId)?.active ? 1 : 0)
       }));
       
-      alert('User deleted successfully!');
+            showNotification('User deleted successfully!');
+          } catch (err) {
+            console.error('Error deleting user:', err);
+            showNotification(err.response?.data?.message || 'Failed to delete user', 'error');
+          }
+        }
+      });
     } catch (err) {
-      console.error('Error deleting user:', err);
-      alert(err.response?.data?.message || 'Failed to delete user');
+      console.error('Error showing delete confirmation:', err);
+      showNotification('Something went wrong', 'error');
     }
-  }, [users]);
+  }, [users, showConfirmDialog, showNotification]);
 
   const handleEditJob = useCallback(async (jobId) => {
     try {
       window.location.href = `/jobs/${jobId}`;
     } catch (err) {
       console.error('Error navigating to job:', err);
-      alert('Failed to navigate to job edit page');
+      showNotification('Failed to navigate to job edit page', 'error');
     }
-  }, []);
+  }, [showNotification]);
 
   const handleDeleteJob = useCallback(async (jobId) => {
     try {
-      if (!window.confirm('Are you sure you want to delete this job?')) {
-        return;
-      }
-
+      showConfirmDialog({
+        title: 'Delete Job',
+        message: 'Are you sure you want to delete this job? This action cannot be undone.',
+        onConfirm: async () => {
+          try {
       const token = localStorage.getItem('token');
       await axios.delete(`http://localhost:5000/api/jobs/${jobId}`, {
         headers: {
@@ -198,12 +227,18 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
         totalJobs: prev.totalJobs - 1
       }));
       
-      alert('Job deleted successfully!');
+            showNotification('Job deleted successfully!');
+          } catch (err) {
+            console.error('Error deleting job:', err);
+            showNotification(err.response?.data?.message || 'Failed to delete job', 'error');
+          }
+        }
+      });
     } catch (err) {
-      console.error('Error deleting job:', err);
-      alert(err.response?.data?.message || 'Failed to delete job');
+      console.error('Error showing delete confirmation:', err);
+      showNotification('Something went wrong', 'error');
     }
-  }, []);
+  }, [showConfirmDialog, showNotification]);
 
   // Filter users based on search and filters
   const filteredUsers = users.filter(user => {

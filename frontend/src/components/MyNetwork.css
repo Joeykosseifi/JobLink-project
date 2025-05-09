@@ -1,7 +1,7 @@
 .my-network-page {
   padding: 40px 20px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 80px auto;
   font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   background-color: #f9fafb;
 }
@@ -184,13 +184,15 @@
 
 /* Network Section */
 .network-section {
-  margin-top: 30px;
+  width: 100%;
+  margin-top: 15px;
 }
 
 .network-stats {
+  width: 100%;
   display: flex;
-  justify-content: center;
-  margin-bottom: 40px;
+  justify-content: flex-start;
+  margin-bottom: 20px;
 }
 
 .stat-card {
@@ -407,22 +409,22 @@
 /* Responsive Styles */
 @media (max-width: 768px) {
   .user-list {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   }
   
   .my-network-page {
-    padding: 20px 15px;
+    padding: 30px 15px;
+    margin: 60px auto;
   }
   
   .network-header h1 {
     font-size: 1.8rem;
   }
-
+  
   .network-header p {
     font-size: 0.9rem;
   }
-
+  
   .stat-value {
     font-size: 1.8rem;
   }
@@ -551,6 +553,94 @@
   margin-bottom: 40px;
 }
 
+/* My Connections and Pending Sections */
+.my-connections-section,
+.pending-connections-section {
+  margin-bottom: 40px;
+}
+
+.section-description {
+  color: #64748b;
+  margin-top: -10px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.connected-user-card {
+  border-left: 4px solid #38a169;
+}
+
+.pending-user-card {
+  border-left: 4px solid #eab308;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.connection-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: #f0f9ff;
+  color: #0a66c2;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #e0f2fe;
+}
+
+.connection-badge i {
+  color: #0a66c2;
+  font-size: 0.75rem;
+}
+
+.pending-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: #fefce8;
+  color: #ca8a04;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #fef9c3;
+}
+
+.pending-badge i {
+  color: #ca8a04;
+  font-size: 0.75rem;
+}
+
+.message-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background-color: #ffffff;
+  color: #0a66c2;
+  border: 1px solid #0a66c2;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.message-button:hover {
+  background-color: #0a66c2;
+  color: white;
+}
+
+.message-button i {
+  font-size: 0.75rem;
+}
+
 /* Notification System */
 .notification {
   position: fixed;
@@ -587,6 +677,20 @@
   font-weight: 500;
 }
 
+/* Responsive adjustments for the new sections */
+@media (max-width: 768px) {
+  .connection-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .my-connections-section,
+  .pending-connections-section {
+    margin-bottom: 30px;
+  }
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -596,4 +700,148 @@
     transform: translateX(0);
     opacity: 1;
   }
+}
+
+/* Add styles for job role badges */
+.user-job-role {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  margin-left: 8px;
+  border-radius: 12px;
+  vertical-align: middle;
+}
+
+.user-job-role.job-seeker {
+  background-color: #ebf8ff;
+  color: #3182ce;
+  border: 1px solid #bee3f8;
+}
+
+.user-job-role.job-poster {
+  background-color: #fefceb;
+  color: #b7791f;
+  border: 1px solid #fef3c7;
+}
+
+.user-job-role i {
+  margin-right: 4px;
+  font-size: 0.65rem;
+}
+
+/* Modify the user name style to accommodate the badge */
+.user-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .user-job-role {
+    margin-left: 0;
+    margin-top: 4px;
+  }
+  
+  .user-name {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .current-user-name .user-job-role {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
+
+/* Add styles for the filter controls */
+.network-filters {
+  margin-bottom: 30px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  padding: 20px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-button i {
+  font-size: 0.9rem;
+}
+
+.filter-button:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.filter-button.active {
+  background-color: #0a66c2;
+  color: white;
+  border-color: #0a66c2;
+}
+
+.no-results {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .filter-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .filter-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Empty Network Section */
+.empty-network-section {
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 40px;
+}
+
+.empty-network-section .no-results {
+  padding: 30px;
+  text-align: center;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.empty-network-section .no-results p {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 10px 0;
 } 

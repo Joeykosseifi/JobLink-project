@@ -14,7 +14,8 @@ const UserAccount = () => {
     profileImage: '',
     currentPassword: '',
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    jobRole: 'job-seeker' // Default to job-seeker
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,6 +31,9 @@ const UserAccount = () => {
     
     try {
       const parsedUser = JSON.parse(userData);
+      console.log('Loaded user data:', parsedUser);
+      console.log('User ID:', parsedUser._id || parsedUser.id);
+      
       setUser(parsedUser);
       setFormData({
         name: parsedUser.name,
@@ -39,7 +43,8 @@ const UserAccount = () => {
         profileImage: parsedUser.profileImage || '',
         currentPassword: '',
         newPassword: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        jobRole: parsedUser.jobRole || 'job-seeker' // Load existing job role or default to job-seeker
       });
       setLoading(false);
     } catch (error) {
@@ -86,6 +91,7 @@ const UserAccount = () => {
         title: formData.title,
         bio: formData.bio,
         profileImage: formData.profileImage,
+        jobRole: formData.jobRole,
         currentPassword: formData.currentPassword ? '[HIDDEN]' : undefined,
         newPassword: formData.newPassword ? '[HIDDEN]' : undefined
       });
@@ -98,6 +104,7 @@ const UserAccount = () => {
           title: formData.title,
           bio: formData.bio,
           profileImage: formData.profileImage,
+          jobRole: formData.jobRole,
           currentPassword: formData.currentPassword || undefined,
           newPassword: formData.newPassword || undefined
         },
@@ -110,10 +117,32 @@ const UserAccount = () => {
       );
 
       console.log('Server response:', response.data);
+      console.log('Updated job role:', response.data.user.jobRole);
 
-      // Update local storage with new user data
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      setUser(response.data.user);
+      // Make sure the jobRole is included in the updated user data
+      const updatedUser = response.data.user;
+      if (!updatedUser.jobRole) {
+        console.warn('Job role not included in response, using form data value');
+        updatedUser.jobRole = formData.jobRole;
+      }
+
+      // Preserve existing user data that wasn't updated
+      const currentUserData = JSON.parse(localStorage.getItem('user'));
+      const mergedUserData = {
+        ...currentUserData,
+        ...updatedUser,
+        // Explicitly ensure these important fields are preserved
+        _id: currentUserData._id || currentUserData.id,
+        connections: currentUserData.connections,
+        connectionRequests: currentUserData.connectionRequests,
+        pendingConnections: currentUserData.pendingConnections
+      };
+
+      console.log('Merged user data being saved:', mergedUserData);
+
+      // Update local storage with merged user data
+      localStorage.setItem('user', JSON.stringify(mergedUserData));
+      setUser(mergedUserData);
       setSuccessMessage('Profile updated successfully!');
       setIsEditing(false);
 
@@ -188,6 +217,10 @@ const UserAccount = () => {
           <div className="profile-details">
             <h2>{formData.name}</h2>
             <p className="profile-title">{formData.title || 'No title specified'}</p>
+            <div className="job-role-badge">
+              <i className={`fas ${formData.jobRole === 'job-seeker' ? 'fa-search' : 'fa-briefcase'}`}></i>
+              {formData.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
+            </div>
           </div>
         </div>
 
@@ -226,6 +259,39 @@ const UserAccount = () => {
               disabled={!isEditing}
               placeholder="e.g. Senior Chef, Restaurant Manager"
             />
+          </div>
+          
+          <div className="form-group">
+            <label>I am a:</label>
+            <div className="job-role-selection">
+              <label className={`job-role-option ${formData.jobRole === 'job-seeker' ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  name="jobRole"
+                  value="job-seeker"
+                  checked={formData.jobRole === 'job-seeker'}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                />
+                <i className="fas fa-search"></i>
+                <span>Job Seeker</span>
+                <p className="role-description">I'm looking for job opportunities</p>
+              </label>
+              
+              <label className={`job-role-option ${formData.jobRole === 'job-poster' ? 'selected' : ''}`}>
+                <input
+                  type="radio"
+                  name="jobRole"
+                  value="job-poster"
+                  checked={formData.jobRole === 'job-poster'}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                />
+                <i className="fas fa-briefcase"></i>
+                <span>Job Poster</span>
+                <p className="role-description">I'm hiring and posting job offers</p>
+              </label>
+            </div>
           </div>
 
           <div className="form-group">

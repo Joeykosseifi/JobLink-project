@@ -19,6 +19,7 @@ const MyNetwork = () => {
     message: '',
     type: 'success'
   });
+  const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,10 +47,27 @@ const MyNetwork = () => {
           })
         ]);
 
-        // Filter out admin users and the current user
-        const filteredUsers = usersResponse.data.data.users.filter(
-          user => user.role !== 'admin' && user._id !== JSON.parse(userData)._id
-        );
+        // Get the current user ID (from parsed user data)
+        const currentUserData = JSON.parse(userData);
+        const currentUserId = currentUserData._id || currentUserData.id;
+
+        // Filter out admin users and current user
+        const filteredUsers = usersResponse.data.data.users.filter(user => {
+          // First check if it's an admin
+          if (user.role === 'admin') return false;
+          
+          // Then check if it's the current user (using multiple comparison methods for safety)
+          if (user._id && currentUserId) {
+            // Try multiple comparison methods to ensure we catch all cases
+            const isCurrentUser = 
+              user._id === currentUserId || 
+              String(user._id) === String(currentUserId);
+              
+            if (isCurrentUser) return false;
+          }
+          
+          return true;
+        });
         
         // Save connection data
         const connectionData = connectionsResponse.data.data;
@@ -95,7 +113,7 @@ const MyNetwork = () => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await axios.post(
+      await axios.post(
         'http://localhost:5000/api/users/connect',
         { userId },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -147,7 +165,7 @@ const MyNetwork = () => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await axios.post(
+      await axios.post(
         'http://localhost:5000/api/users/accept-connection',
         { userId },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -202,7 +220,7 @@ const MyNetwork = () => {
     try {
       const token = localStorage.getItem('token');
       
-      const response = await axios.post(
+      await axios.post(
         'http://localhost:5000/api/users/reject-connection',
         { userId },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -294,6 +312,30 @@ const MyNetwork = () => {
     }
   };
 
+  // Filter users based on job role
+  const getFilteredUsers = (usersList) => {
+    if (activeFilter === 'all') {
+      return usersList;
+    }
+    
+    return usersList.filter(user => {
+      // Treat users without a jobRole as job-seekers by default
+      const userRole = user.jobRole || 'job-seeker';
+      return userRole === activeFilter;
+    });
+  };
+
+  // Set active filter
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+  };
+
+  // Get non-connected users for the "People in Your Network" section
+  const getNonConnectedUsers = () => {
+    // Filter out users who already have a connection status
+    return users.filter(user => !connectStatus[user._id]);
+  };
+
   if (loading) {
     return (
       <div className="network-loading">
@@ -346,7 +388,15 @@ const MyNetwork = () => {
                 )}
               </div>
               <div className="current-user-basics">
-                <h2 className="current-user-name">{currentUser.name}</h2>
+                <h2 className="current-user-name">
+                  {currentUser.name}
+                  {currentUser.jobRole && (
+                    <span className={`user-job-role ${currentUser.jobRole}`}>
+                      <i className={`fas ${currentUser.jobRole === 'job-seeker' ? 'fa-search' : 'fa-briefcase'}`}></i>
+                      {currentUser.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
+                    </span>
+                  )}
+                </h2>
                 <p className="current-user-title">{currentUser.title || 'Add your professional title'}</p>
                 <Link to="/user/account" className="edit-profile-button">
                   <i className="fas fa-edit"></i> Edit Your Profile
@@ -379,12 +429,37 @@ const MyNetwork = () => {
         </div>
       )}
       
+      {/* Filter Controls */}
+      <div className="network-filters">
+        <h2 className="section-title">Filter Network</h2>
+        <div className="filter-buttons">
+          <button 
+            className={`filter-button ${activeFilter === 'all' ? 'active' : ''}`}
+            onClick={() => handleFilterChange('all')}
+          >
+            <i className="fas fa-users"></i> All Professionals
+          </button>
+          <button 
+            className={`filter-button ${activeFilter === 'job-seeker' ? 'active' : ''}`}
+            onClick={() => handleFilterChange('job-seeker')}
+          >
+            <i className="fas fa-search"></i> Job Seekers
+          </button>
+          <button 
+            className={`filter-button ${activeFilter === 'job-poster' ? 'active' : ''}`}
+            onClick={() => handleFilterChange('job-poster')}
+          >
+            <i className="fas fa-briefcase"></i> Job Posters
+          </button>
+        </div>
+      </div>
+      
       {/* Connection Requests Section */}
       {connections.requests.length > 0 && (
         <div className="connection-requests-section">
           <h2 className="section-title">Connection Requests</h2>
           <div className="user-list">
-            {connections.requests.map((user) => (
+            {getFilteredUsers(connections.requests).map((user) => (
               <div className="user-card" key={user._id}>
                 <div className="user-header">
                   <div className="user-avatar">
@@ -397,7 +472,15 @@ const MyNetwork = () => {
                     )}
                   </div>
                   <div className="user-basics">
-                    <h3 className="user-name">{user.name}</h3>
+                    <h3 className="user-name">
+                      {user.name}
+                      {user.jobRole && (
+                        <span className={`user-job-role ${user.jobRole}`}>
+                          <i className={`fas ${user.jobRole === 'job-seeker' ? 'fa-search' : 'fa-briefcase'}`}></i>
+                          {user.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
+                        </span>
+                      )}
+                    </h3>
                     <p className="user-title">{user.title || 'JobLink Member'}</p>
                     <div className="request-buttons">
                       <button 
@@ -427,21 +510,155 @@ const MyNetwork = () => {
               </div>
             ))}
           </div>
+          {activeFilter !== 'all' && getFilteredUsers(connections.requests).length === 0 && (
+            <div className="no-results">
+              <p>No {activeFilter === 'job-seeker' ? 'job seekers' : 'job posters'} in your connection requests.</p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Network Section */}
+      {/* My Connections Section */}
+      {connections.connected.length > 0 && (
+        <div className="my-connections-section">
+          <h2 className="section-title">My Connections</h2>
+          <p className="section-description">People you've connected with on JobLink</p>
+          
+          <div className="user-list">
+            {getFilteredUsers(connections.connected).map((user) => (
+              <div className="user-card connected-user-card" key={user._id}>
+                <div className="user-header">
+                  <div className="user-avatar">
+                    {user.profileImage ? (
+                      <img src={user.profileImage} alt={user.name} />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="user-basics">
+                    <h3 className="user-name">
+                      {user.name}
+                      {user.jobRole && (
+                        <span className={`user-job-role ${user.jobRole}`}>
+                          <i className={`fas ${user.jobRole === 'job-seeker' ? 'fa-search' : 'fa-briefcase'}`}></i>
+                          {user.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
+                        </span>
+                      )}
+                    </h3>
+                    <p className="user-title">{user.title || 'JobLink Member'}</p>
+                    <div className="connection-status">
+                      <span className="connection-badge">
+                        <i className="fas fa-check"></i> Connected
+                      </span>
+                      <button className="message-button">
+                        <i className="fas fa-envelope"></i> Message
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="user-body">
+                  <div className="user-about">
+                    <h3><i className="fas fa-user"></i> About</h3>
+                    <p className="user-bio">
+                      {user.bio || 
+                        'This user has not added a bio yet.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {activeFilter !== 'all' && getFilteredUsers(connections.connected).length === 0 && (
+            <div className="no-results">
+              <p>No {activeFilter === 'job-seeker' ? 'job seekers' : 'job posters'} in your connections.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Pending Connections Section */}
+      {connections.pending.length > 0 && (
+        <div className="pending-connections-section">
+          <h2 className="section-title">Pending Connections</h2>
+          <p className="section-description">Connection requests you've sent</p>
+          
+          <div className="user-list">
+            {getFilteredUsers(connections.pending).map((user) => (
+              <div className="user-card pending-user-card" key={user._id}>
+                <div className="user-header">
+                  <div className="user-avatar">
+                    {user.profileImage ? (
+                      <img src={user.profileImage} alt={user.name} />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="user-basics">
+                    <h3 className="user-name">
+                      {user.name}
+                      {user.jobRole && (
+                        <span className={`user-job-role ${user.jobRole}`}>
+                          <i className={`fas ${user.jobRole === 'job-seeker' ? 'fa-search' : 'fa-briefcase'}`}></i>
+                          {user.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
+                        </span>
+                      )}
+                    </h3>
+                    <p className="user-title">{user.title || 'JobLink Member'}</p>
+                    <div className="connection-status">
+                      <span className="pending-badge">
+                        <i className="fas fa-clock"></i> Request Pending
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="user-body">
+                  <div className="user-about">
+                    <h3><i className="fas fa-user"></i> About</h3>
+                    <p className="user-bio">
+                      {user.bio || 
+                        'This user has not added a bio yet.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {activeFilter !== 'all' && getFilteredUsers(connections.pending).length === 0 && (
+            <div className="no-results">
+              <p>No {activeFilter === 'job-seeker' ? 'job seekers' : 'job posters'} in your pending connections.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Network Section - Only show users that aren't connected */}
+      {getNonConnectedUsers().length > 0 && (
       <div className="network-section">
         <h2 className="section-title">People in Your Network</h2>
         <div className="network-stats">
           <div className="stat-card">
-            <div className="stat-value">{users.length}</div>
-            <div className="stat-label">Professionals</div>
+              <div className="stat-value">
+                {activeFilter === 'all' 
+                  ? getNonConnectedUsers().length 
+                  : getNonConnectedUsers().filter(user => {
+                      const userRole = user.jobRole || 'job-seeker';
+                      return userRole === activeFilter;
+                    }).length}
+              </div>
+              <div className="stat-label">
+                {activeFilter === 'all' 
+                  ? 'Professionals' 
+                  : activeFilter === 'job-seeker' ? 'Job Seekers' : 'Job Posters'}
+              </div>
           </div>
         </div>
 
         <div className="user-list">
-          {users.map((user) => (
+            {getFilteredUsers(getNonConnectedUsers()).map((user) => (
             <div className="user-card" key={user._id}>
               <div className="user-header">
                 <div className="user-avatar">
@@ -454,7 +671,15 @@ const MyNetwork = () => {
                   )}
                 </div>
                 <div className="user-basics">
-                  <h3 className="user-name">{user.name}</h3>
+                    <h3 className="user-name">
+                      {user.name}
+                      {user.jobRole && (
+                        <span className={`user-job-role ${user.jobRole}`}>
+                          <i className={`fas ${user.jobRole === 'job-seeker' ? 'fa-search' : 'fa-briefcase'}`}></i>
+                          {user.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
+                        </span>
+                      )}
+                    </h3>
                   <p className="user-title">{user.title || 'JobLink Member'}</p>
                   {getConnectionButton(user)}
                 </div>
@@ -471,7 +696,22 @@ const MyNetwork = () => {
             </div>
           ))}
         </div>
+          {activeFilter !== 'all' && getFilteredUsers(getNonConnectedUsers()).length === 0 && (
+            <div className="no-results">
+              <p>No {activeFilter === 'job-seeker' ? 'job seekers' : 'job posters'} found in your network.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {getNonConnectedUsers().length === 0 && (
+        <div className="empty-network-section">
+          <h2 className="section-title">People in Your Network</h2>
+          <div className="no-results">
+            <p>You've connected with everyone in your network! Check back later for new professionals.</p>
+        </div>
       </div>
+      )}
     </div>
   );
 };

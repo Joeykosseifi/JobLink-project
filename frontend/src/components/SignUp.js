@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import './SignUp.css';
+import { useNotification } from './NotificationContext';
 
 function SignUp() {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,6 +28,7 @@ function SignUp() {
     
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      showNotification('Passwords do not match', 'error');
       return;
     }
 
@@ -47,9 +50,11 @@ function SignUp() {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        showNotification('Account created successfully! Redirecting...', 'success');
         navigate('/');
       } else {
         setError('Invalid response from server');
+        showNotification('Invalid response from server', 'error');
       }
     } catch (error) {
       console.error('Full error object:', error);
@@ -58,15 +63,21 @@ function SignUp() {
         // that falls out of the range of 2xx
         console.error('Error response data:', error.response.data);
         console.error('Error response status:', error.response.status);
-        setError(error.response.data.message || 'An error occurred during sign up');
+        const errorMessage = error.response.data.message || 'An error occurred during sign up';
+        setError(errorMessage);
+        showNotification(errorMessage, 'error');
       } else if (error.request) {
         // The request was made but no response was received
         console.error('No response received:', error.request);
-        setError('Could not connect to the server. Please check if the server is running.');
+        const errorMessage = 'Could not connect to the server. Please check if the server is running.';
+        setError(errorMessage);
+        showNotification(errorMessage, 'error');
       } else {
         // Something happened in setting up the request that triggered an Error
         console.error('Error setting up request:', error.message);
-        setError('An error occurred while setting up the request.');
+        const errorMessage = 'An error occurred while setting up the request.';
+        setError(errorMessage);
+        showNotification(errorMessage, 'error');
       }
     }
   };

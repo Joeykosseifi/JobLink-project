@@ -12,6 +12,7 @@ import ContactUs from './components/ContactUs';
 import Footer from './components/Footer';
 import NotFound from './components/NotFound';
 import MyNetwork from './components/MyNetwork';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import PostJob from './components/PostJob';
 import AdminDashboard from './components/AdminDashboard';
@@ -45,14 +46,51 @@ const AppContent = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/network" element={<MyNetwork />} />
+        {/* Network route is now protected and not accessible to admins */}
+        <Route path="/network" element={
+          <ProtectedRoute 
+            element={<MyNetwork />} 
+            adminAllowed={false} 
+          />
+        } />
         <Route path="/postjob" element={<PostJob />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/users" element={<AdminDashboard activeTab="users" />} />
-        <Route path="/admin/jobs" element={<AdminDashboard activeTab="jobs" />} />
-        <Route path="/admin/messages" element={<AdminMessages />} />
-        <Route path="/admin/analytics" element={<AdminAnalytics />} />
-        <Route path="/admin/applications" element={<AdminApplications />} />
+        {/* Admin routes are only accessible to admins */}
+        <Route path="/admin/dashboard" element={
+          <ProtectedRoute 
+            element={<AdminDashboard />} 
+            nonAdminAllowed={false} 
+          />
+        } />
+        <Route path="/admin/users" element={
+          <ProtectedRoute 
+            element={<AdminDashboard activeTab="users" />} 
+            nonAdminAllowed={false} 
+          />
+        } />
+        <Route path="/admin/jobs" element={
+          <ProtectedRoute 
+            element={<AdminDashboard activeTab="jobs" />} 
+            nonAdminAllowed={false} 
+          />
+        } />
+        <Route path="/admin/messages" element={
+          <ProtectedRoute 
+            element={<AdminMessages />} 
+            nonAdminAllowed={false} 
+          />
+        } />
+        <Route path="/admin/analytics" element={
+          <ProtectedRoute 
+            element={<AdminAnalytics />} 
+            nonAdminAllowed={false} 
+          />
+        } />
+        <Route path="/admin/applications" element={
+          <ProtectedRoute 
+            element={<AdminApplications />} 
+            nonAdminAllowed={false} 
+          />
+        } />
         <Route path="/user/account" element={<UserAccount />} />
         <Route path="/settings" element={<Settings />} />
         {/* Catch-all route for 404 Not Found */}

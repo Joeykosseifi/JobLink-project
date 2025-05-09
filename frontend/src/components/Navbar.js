@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 import './Navbar.css';
+import { useNotification } from './NotificationContext';
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -8,12 +10,14 @@ function Navbar() {
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [recentAccounts, setRecentAccounts] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [connectionRequests, setConnectionRequests] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const mobileMenuRef = useRef(null);
   const accountMenuRef = useRef(null);
+  const { showNotification } = useNotification();
 
-  const checkAuthStatus = () => {
+  const checkAuthStatus = useCallback(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     const savedAccounts = JSON.parse(localStorage.getItem('recentAccounts') || '[]');
@@ -48,6 +52,7 @@ function Navbar() {
         localStorage.removeItem('user');
         setIsLoggedIn(false);
         setUser(null);
+        showNotification('Session expired. Please login again.', 'warning');
       }
     } else {
       setIsLoggedIn(false);
@@ -55,27 +60,69 @@ function Navbar() {
       // Still load recent accounts even when logged out
       setRecentAccounts(savedAccounts);
     }
-  };
+  }, [showNotification]);
+
+  const fetchConnectionRequests = useCallback(async () => {
+    if (!isLoggedIn) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      
+      const response = await axios.get('http://localhost:5000/api/users/connections', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.data) {
+        const { connectionRequests } = response.data.data;
+        setConnectionRequests(connectionRequests ? connectionRequests.length : 0);
+      }
+    } catch (error) {
+      console.error('Error fetching connection requests:', error);
+    }
+  }, [isLoggedIn]);
 
   // Check auth status on mount and when location changes
   useEffect(() => {
     checkAuthStatus();
     // Close mobile menu when location changes
     setMobileMenuOpen(false);
-  }, [location]);
+  }, [location, checkAuthStatus]);
+
+  // Fetch connection requests when logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchConnectionRequests();
+      
+      // Set up polling every 30 seconds to check for new connection requests
+      const intervalId = setInterval(fetchConnectionRequests, 30000);
+      
+      return () => clearInterval(intervalId);
+    }
+  }, [isLoggedIn, fetchConnectionRequests]);
+
+  // Reset connection requests when location changes to /network
+  useEffect(() => {
+    if (location.pathname === '/network') {
+      setConnectionRequests(0);
+    }
+  }, [location.pathname]);
 
   const handleLogout = () => {
+    const userName = user?.name || 'User';
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setIsLoggedIn(false);
     setUser(null);
     setShowAccountMenu(false);
+    showNotification(`Goodbye, ${userName}! You have been logged out successfully.`, 'info');
     navigate('/login');
   };
 
   const switchAccount = (account) => {
     // Store current account credentials if needed
     setShowAccountMenu(false);
+    showNotification(`Switching to ${account.name}'s account...`, 'info');
     navigate('/login', { state: { email: account.email } });
   };
 
@@ -148,9 +195,12 @@ function Navbar() {
           <i className="fas fa-envelope"></i> Contact Us
         </Link>
         
-        {isLoggedIn && (
+        {isLoggedIn && user && user.role !== 'admin' && (
           <Link to="/network" className={`nav-link ${isActive('/network') ? 'active' : ''}`} onClick={handleNavLinkClick}>
             <i className="fas fa-users"></i> My Network
+            {connectionRequests > 0 && (
+              <span className="notification-badge">{connectionRequests}</span>
+            )}
           </Link>
         )}
         

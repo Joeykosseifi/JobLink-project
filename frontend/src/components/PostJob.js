@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './PostJob.css';
+import { useNotification } from './NotificationContext';
 
 function PostJob() {
+  const { showNotification } = useNotification();
   const [currentStep, setCurrentStep] = useState(1);
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
@@ -128,7 +130,7 @@ function PostJob() {
       setSuccess(true);
       setLoading(false);
       
-      
+      showNotification('Job posted successfully!', 'success');
       
       // Reset form after successful submission
       setFormData({
@@ -159,9 +161,10 @@ function PostJob() {
       
     } catch (error) {
       setLoading(false);
-      setError(error.response?.data?.message || 'Failed to post job. Please try again.');
+      const errorMessage = error.response?.data?.message || 'Failed to post job. Please try again.';
+      setError(errorMessage);
       console.error('Error posting job:', error);
-      alert('Error posting job: ' + (error.response?.data?.message || 'Please try again.'));
+      showNotification(errorMessage, 'error');
     }
   };
 

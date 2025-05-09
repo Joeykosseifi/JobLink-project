@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: 'user'
   },
+  // Job role field to identify job seekers vs job posters
+  jobRole: {
+    type: String,
+    enum: ['job-seeker', 'job-poster'],
+    default: 'job-seeker'
+  },
   // Profile fields
   title: {
     type: String,

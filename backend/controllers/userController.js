@@ -180,9 +180,9 @@ export const getUserConnections = async (req, res) => {
     const userId = req.user.id;
 
     const user = await User.findById(userId)
-      .populate('connections', 'name email title bio profileImage')
-      .populate('connectionRequests', 'name email title bio profileImage')
-      .populate('pendingConnections', 'name email title bio profileImage');
+      .populate('connections', 'name email title bio profileImage jobRole')
+      .populate('connectionRequests', 'name email title bio profileImage jobRole')
+      .populate('pendingConnections', 'name email title bio profileImage jobRole');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -206,7 +206,7 @@ export const getUserConnections = async (req, res) => {
 // Update user profile
 export const updateProfile = async (req, res) => {
   try {
-    const { name, email, title, bio, profileImage, currentPassword, newPassword } = req.body;
+    const { name, email, title, bio, profileImage, jobRole, currentPassword, newPassword } = req.body;
     const userId = req.user.id; // This will come from the auth middleware
 
     // Find the user
@@ -231,6 +231,7 @@ export const updateProfile = async (req, res) => {
     if (title !== undefined) user.title = title;
     if (bio !== undefined) user.bio = bio;
     if (profileImage !== undefined) user.profileImage = profileImage;
+    if (jobRole !== undefined) user.jobRole = jobRole;
 
     // Update password if new password is provided
     if (newPassword && currentPassword) {
@@ -247,6 +248,7 @@ export const updateProfile = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      jobRole: user.jobRole,
       title: user.title,
       bio: user.bio,
       profileImage: user.profileImage,

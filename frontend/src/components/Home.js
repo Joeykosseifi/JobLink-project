@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Home.css';
@@ -57,6 +57,49 @@ function Home() {
       avatar: "https://randomuser.me/api/portraits/women/68.jpg"
     }
   ];
+
+  // Animate counters with real data - define this first to avoid circular dependencies
+  const animateCounters = useCallback((jobsTarget, seekersTarget, companiesTarget) => {
+    const duration = 2000; // Animation duration in ms
+    let startTime = null;
+    
+    const step = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      
+      setJobsCount(Math.floor(progress * jobsTarget));
+      setSeekersCount(Math.floor(progress * seekersTarget));
+      setCompaniesCount(Math.floor(progress * companiesTarget));
+      
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    
+    window.requestAnimationFrame(step);
+  }, []);
+  
+  // Fetch live stats from API - now with proper dependency on animateCounters
+  const fetchLiveStats = useCallback(async () => {
+    try {
+      setLiveStatsLoading(true);
+      const response = await axios.get('http://localhost:5000/api/stats');
+      
+      if (response.data && response.data.success) {
+        const stats = response.data.data;
+        animateCounters(stats.jobs, stats.seekers, stats.companies);
+      } else {
+        // Fallback to sample data if API format is unexpected
+        animateCounters(2450, 3200, 350);
+      }
+    } catch (error) {
+      console.error('Error fetching live stats:', error);
+      // Fallback to sample data if API fails
+      animateCounters(2450, 3200, 350);
+    } finally {
+      setLiveStatsLoading(false);
+    }
+  }, [animateCounters]);
 
   useEffect(() => {
     const fetchFeaturedJobs = async () => {
@@ -131,50 +174,7 @@ function Home() {
       clearInterval(testimonialInterval);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [testimonials.length, ctaBannerClosed]);
-
-  // Fetch live stats from API
-  const fetchLiveStats = async () => {
-    try {
-      setLiveStatsLoading(true);
-      const response = await axios.get('http://localhost:5000/api/stats');
-      
-      if (response.data && response.data.success) {
-        const stats = response.data.data;
-        animateCounters(stats.jobs, stats.seekers, stats.companies);
-      } else {
-        // Fallback to sample data if API format is unexpected
-        animateCounters(2450, 3200, 350);
-      }
-    } catch (error) {
-      console.error('Error fetching live stats:', error);
-      // Fallback to sample data if API fails
-      animateCounters(2450, 3200, 350);
-    } finally {
-      setLiveStatsLoading(false);
-    }
-  };
-  
-  // Animate counters with real data
-  const animateCounters = (jobsTarget, seekersTarget, companiesTarget) => {
-    const duration = 2000; // Animation duration in ms
-    let startTime = null;
-    
-    const step = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      
-      setJobsCount(Math.floor(progress * jobsTarget));
-      setSeekersCount(Math.floor(progress * seekersTarget));
-      setCompaniesCount(Math.floor(progress * companiesTarget));
-      
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
-    
-    window.requestAnimationFrame(step);
-  };
+  }, [testimonials.length, ctaBannerClosed, fetchLiveStats]);
 
   const handleButtonClick = (destination) => {
     const token = localStorage.getItem('token');

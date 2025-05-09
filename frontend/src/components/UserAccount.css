@@ -260,6 +260,76 @@
   font-size: 1.2rem;
 }
 
+/* Add these new styles for job role selection and badges */
+
+/* Job Role Badge in profile preview */
+.job-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  margin-top: 8px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(to right, #0077b5, #0a66c2);
+}
+
+.job-role-badge i {
+  font-size: 0.8rem;
+}
+
+/* Job Role Selection in form */
+.job-role-selection {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.job-role-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.job-role-option.selected {
+  border-color: #0a66c2;
+  background-color: rgba(10, 102, 194, 0.05);
+}
+
+.job-role-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+
+.job-role-option i {
+  font-size: 2rem;
+  color: #0a66c2;
+  margin-bottom: 12px;
+}
+
+.job-role-option span {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2d3748;
+  margin-bottom: 6px;
+}
+
+.role-description {
+  font-size: 0.85rem;
+  color: #718096;
+  text-align: center;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .user-account-page {
     padding: 1rem;
@@ -288,5 +358,10 @@
 
   .form-group input {
     font-size: 16px; /* Prevents zoom on mobile */
+  }
+
+  .job-role-selection {
+    flex-direction: column;
+    gap: 15px;
   }
 } 

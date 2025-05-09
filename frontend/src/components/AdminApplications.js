@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import './AdminApplications.css';
+import { useNotification } from './NotificationContext';
+import { useDialog } from './DialogContext';
 
 function AdminApplications() {
   const [loading, setLoading] = useState(true);
@@ -11,86 +13,11 @@ function AdminApplications() {
   const [currentPage, setCurrentPage] = useState(1);
   const applicationsPerPage = 10;
 
-  const fetchApplications = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Authentication required. Please log in again.');
-        setLoading(false);
-        return;
-      }
-      
-      const response = await fetch('http://localhost:5000/api/admin/applications', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch applications');
-      }
-      
-      const data = await response.json();
-      if (data.data.applications && data.data.applications.length > 0) {
-        setApplications(data.data.applications);
-      } else {
-        // Use mock data if no real applications exist yet
-        console.log('No applications found in database, using mock data');
-        setApplications(mockApplications);
-      }
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching applications:', err);
-      // Use mock data on error as fallback
-      console.log('Error fetching applications, using mock data instead');
-      setApplications(mockApplications);
-      setError(null); // Clear the error since we're showing mock data
-      setLoading(false);
-    }
-  }, []);
+  const { showNotification } = useNotification();
+  const { showConfirmDialog } = useDialog();
 
-  useEffect(() => {
-    fetchApplications();
-  }, [fetchApplications]);
-
-  const handleUpdateStatus = async (id, newStatus) => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-      
-      const response = await fetch(`http://localhost:5000/api/admin/applications/${id}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update application status');
-      }
-      
-      // Update the local state
-      setApplications(applications.map(app => 
-        app._id === id ? { ...app, status: newStatus } : app
-      ));
-
-      // Show a success message
-      alert(`Application status updated to ${newStatus}`);
-    } catch (error) {
-      console.error('Error updating application status:', error);
-      alert(error.message);
-    }
-  };
-
-  // Mock data for UI development - this will be replaced by real data
-  const mockApplications = [
+  // Mock data for UI development - wrapped in useMemo to avoid recreation on each render
+  const mockApplications = useMemo(() => [
     {
       _id: '1',
       jobId: {
@@ -181,7 +108,96 @@ function AdminApplications() {
       status: 'rejected',
       createdAt: '2023-09-08T11:30:00.000Z'
     }
-  ];
+  ], []);
+
+  const fetchApplications = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required. Please log in again.');
+        showNotification('Authentication required. Please log in again.', 'error');
+        setLoading(false);
+        return;
+      }
+      
+      const response = await fetch('http://localhost:5000/api/admin/applications', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch applications');
+      }
+      
+      const data = await response.json();
+      if (data.data.applications && data.data.applications.length > 0) {
+        setApplications(data.data.applications);
+      } else {
+        // Use mock data if no real applications exist yet
+        console.log('No applications found in database, using mock data');
+        setApplications(mockApplications);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching applications:', err);
+      // Use mock data on error as fallback
+      console.log('Error fetching applications, using mock data instead');
+      setApplications(mockApplications);
+      setError(null); // Clear the error since we're showing mock data
+      setLoading(false);
+    }
+  }, [mockApplications, showNotification]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [fetchApplications]);
+
+  const handleUpdateStatus = async (id, newStatus) => {
+    showConfirmDialog({
+      title: 'Update Application Status',
+      message: `Are you sure you want to change the application status to "${newStatus}"?`,
+      confirmText: 'Update',
+      cancelText: 'Cancel',
+      confirmButtonClass: 'btn-primary',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          
+          if (!token) {
+            showNotification('Authentication required', 'error');
+            return;
+          }
+          
+          const response = await fetch(`http://localhost:5000/api/admin/applications/${id}/status`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: newStatus })
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to update application status');
+          }
+          
+          // Update the local state
+          setApplications(applications.map(app => 
+            app._id === id ? { ...app, status: newStatus } : app
+          ));
+
+          // Show a success notification
+          showNotification(`Application status updated to ${newStatus}`, 'success');
+        } catch (error) {
+          console.error('Error updating application status:', error);
+          showNotification(error.message, 'error');
+        }
+      }
+    });
+  };
 
   // Filter applications based on search and status filter
   const filteredApplications = applications.filter(app => {
