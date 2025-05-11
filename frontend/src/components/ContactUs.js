@@ -174,8 +174,8 @@ function ContactUs() {
                 <i className="fas fa-phone-alt"></i>
                 <div>
                   <h3>Call Us</h3>
-                  <p>Main: (123) 456-7890</p>
-                  <p>Support: (123) 456-7891</p>
+                  <p>Main: +961 1 999 888</p>
+                  <p>Support: +961 9 888 777</p>
                 </div>
               </div>
               

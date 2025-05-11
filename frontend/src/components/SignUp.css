@@ -78,18 +78,21 @@
 .input-group i {
   position: absolute;
   left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: #a0aec0;
   font-size: 1.2rem;
 }
 
 .input-group input {
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  padding: 0.75rem 1rem 0.75rem 3.25rem !important;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   font-size: 1rem;
   transition: all 0.3s ease;
   background-color: #f8fafc;
+  box-sizing: border-box;
 }
 
 .input-group input:focus {
