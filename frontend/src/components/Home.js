@@ -417,7 +417,7 @@ function Home() {
         ) : (
           <div className="featured-jobs-container">
             {featuredJobs.length > 0 ? (
-              featuredJobs.map(job => (
+              featuredJobs.slice(0, 3).map(job => (
                 <div key={job._id} className="job-card" onClick={() => handleJobClick(job._id)}>
                   <div className="job-card-header">
                     <h3>{job.title}</h3>
@@ -462,15 +462,27 @@ function Home() {
           <p>Discover opportunities across major hospitality sectors</p>
         </div>
         <div className="categories-container">
-          {jobCategories.map(category => (
-            <div key={category.id} className="category-card" onClick={() => handleButtonClick('/jobs')}>
-              <div className="category-icon">
-                <i className={category.icon}></i>
+          <div className="categories-scroll-wrapper">
+            {jobCategories.map(category => (
+              <div key={category.id} className="category-card" onClick={() => handleButtonClick('/jobs')}>
+                <div className="category-icon">
+                  <i className={category.icon}></i>
+                </div>
+                <h3>{category.title}</h3>
+                <div className="category-count">{category.count} jobs</div>
               </div>
-              <h3>{category.title}</h3>
-              <div className="category-count">{category.count} jobs</div>
-            </div>
-          ))}
+            ))}
+            {/* Duplicate for seamless infinite scroll */}
+            {jobCategories.map(category => (
+              <div key={`dup-${category.id}`} className="category-card" onClick={() => handleButtonClick('/jobs')}>
+                <div className="category-icon">
+                  <i className={category.icon}></i>
+                </div>
+                <h3>{category.title}</h3>
+                <div className="category-count">{category.count} jobs</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
       

@@ -221,4 +221,11 @@
     margin-top: 10px;
     justify-content: center;
   }
+}
+
+.footer a:focus, .footer button:focus, .footer-links a:focus, .footer-col ul li a:focus {
+  outline: 2px solid #2557a7;
+  outline-offset: 2px;
+  background: #e6f0fa;
+  color: #2557a7 !important;
 } 

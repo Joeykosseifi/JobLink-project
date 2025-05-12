@@ -71,7 +71,7 @@
 /* Jobs Grid */
 .jobs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
 }
 
@@ -249,6 +249,26 @@
   background-color: #004182;
 }
 
+.job-save-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 1.3rem;
+  color: #a0aec0;
+  transition: color 0.2s;
+}
+
+.job-save-btn:hover, .job-save-btn:focus {
+  color: #2557a7;
+  outline: 2px solid #2557a7;
+  outline-offset: 2px;
+}
+
+.job-save-btn.saved {
+  color: #2557a7;
+}
+
 /* Loading, Error, Empty States */
 .jobs-loading, .jobs-error, .jobs-empty {
   text-align: center;
@@ -319,4 +339,25 @@
   .jobs-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.job-view-saved-btn {
+  background: #0a66c2;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+.job-view-saved-btn:hover, .job-view-saved-btn:focus {
+  background: #004182;
+  outline: 2px solid #2557a7;
+  outline-offset: 2px;
 } 

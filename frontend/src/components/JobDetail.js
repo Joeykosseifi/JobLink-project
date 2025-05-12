@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import './JobDetail.css';
 import { useNotification } from './NotificationContext';
-import { useDialog } from './DialogContext';
 
 function JobDetail() {
   const { id } = useParams();
@@ -11,7 +10,6 @@ function JobDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { showNotification } = useNotification();
-  const { showConfirmDialog } = useDialog();
 
   const fetchJob = useCallback(async () => {
     setLoading(true);
@@ -34,28 +32,6 @@ function JobDetail() {
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
-  const handleApplyNow = () => {
-    // Check if user is logged in first
-    const token = localStorage.getItem('token');
-    if (!token) {
-      showNotification('Please login to apply for this job', 'warning');
-      return;
-    }
-
-    showConfirmDialog({
-      title: 'Apply for Job',
-      message: `Are you sure you want to apply for ${job.title} at ${job.company}?`,
-      confirmText: 'Apply',
-      cancelText: 'Cancel',
-      confirmButtonClass: 'btn-primary',
-      onConfirm: () => {
-        // Here you would handle the application submission logic
-        // For now, we're just showing a notification
-        showNotification('Your application has been submitted successfully!', 'success');
-      }
-    });
   };
 
   const handleShareJob = () => {
@@ -279,9 +255,6 @@ function JobDetail() {
               </div>
             )}
           </div>
-          <button className="apply-now-btn" onClick={handleApplyNow}>
-            <i className='bx bx-send'></i> Apply Now
-          </button>
         </div>
 
         <div className="job-detail-actions">

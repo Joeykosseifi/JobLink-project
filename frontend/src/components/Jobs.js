@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './Jobs.css';
+import { useNotification } from './NotificationContext';
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);
@@ -13,6 +14,9 @@ function Jobs() {
     experience: '',
     remote: false
   });
+  const [savedJobs, setSavedJobs] = useState([]);
+  const { showNotification } = useNotification();
+  const [showSaved, setShowSaved] = useState(false);
 
   // Job categories for filter
   const jobCategories = [
@@ -74,6 +78,20 @@ function Jobs() {
     fetchJobs();
   }, [fetchJobs]);
 
+  useEffect(() => {
+    // Fetch saved jobs for the logged-in user
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.get('http://localhost:5000/api/users/saved-jobs', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => {
+          setSavedJobs(res.data.savedJobs.map(job => job._id));
+        })
+        .catch(() => setSavedJobs([]));
+    }
+  }, []);
+
   const handleFilterChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFilters({
@@ -87,11 +105,53 @@ function Jobs() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const handleSaveJob = async (jobId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showNotification('Please login to save jobs.', 'warning');
+      return;
+    }
+    try {
+      await axios.post('http://localhost:5000/api/users/save-job', { jobId }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSavedJobs(prev => [...prev, jobId]);
+    } catch (err) {
+      showNotification('Failed to save job.', 'error');
+    }
+  };
+
+  const handleUnsaveJob = async (jobId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showNotification('Please login to unsave jobs.', 'warning');
+      return;
+    }
+    try {
+      await axios.post('http://localhost:5000/api/users/unsave-job', { jobId }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSavedJobs(prev => prev.filter(id => id !== jobId));
+    } catch (err) {
+      showNotification('Failed to unsave job.', 'error');
+    }
+  };
+
   return (
     <div className="jobs-container">
-      <h1>Available Jobs</h1>
-      
-      <div className="jobs-filter-bar">
+      <h1>{showSaved ? 'Saved Jobs' : 'Available Jobs'}</h1>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+        {!showSaved ? (
+          <button className="job-view-saved-btn" onClick={() => setShowSaved(true)}>
+            <i className="fas fa-bookmark"></i> View Saved Jobs
+          </button>
+        ) : (
+          <button className="job-view-saved-btn" onClick={() => setShowSaved(false)}>
+            <i className="fas fa-arrow-left"></i> Back to All Jobs
+          </button>
+        )}
+      </div>
+      <div className="jobs-filter-bar" style={{ display: showSaved ? 'none' : undefined }}>
         <div className="filter-group">
           <select 
             name="category" 
@@ -170,17 +230,73 @@ function Jobs() {
           <i className='bx bx-error-circle'></i>
           <p>{error}</p>
         </div>
-      ) : jobs.length === 0 ? (
+      ) : (showSaved ? (
+        <div className="jobs-grid">
+          {jobs.filter(job => savedJobs.includes(job._id)).length === 0 ? (
         <div className="jobs-empty">
-          <i className='bx bx-search-alt'></i>
-          <p>No jobs found matching your criteria.</p>
-          <button onClick={() => setFilters({
-            category: '',
-            type: '',
-            location: '',
-            experience: '',
-            remote: false
-          })} className="reset-filters-btn">Reset Filters</button>
+              <i className='fas fa-bookmark'></i>
+              <p>You have no saved jobs.</p>
+            </div>
+          ) : (
+            jobs.filter(job => savedJobs.includes(job._id)).map(job => (
+              <div key={job._id} className="job-card">
+                <div className="job-card-header">
+                  {job.companyLogo ? (
+                    <div className="job-logo">
+                      <img src={job.companyLogo} alt={job.company} />
+                    </div>
+                  ) : (
+                    <div className="job-logo job-logo-placeholder">
+                      <span>{job.company.charAt(0)}</span>
+                    </div>
+                  )}
+                  <div className="job-meta">
+                    {job.urgent && <span className="job-tag urgent">Urgent</span>}
+                    {job.featured && <span className="job-tag featured">Featured</span>}
+                    {job.remote && <span className="job-tag remote">Remote</span>}
+                  </div>
+                </div>
+                <div className="job-card-body">
+                  <h2 className="job-title">{job.title}</h2>
+                  <p className="job-company">{job.company}</p>
+                  <div className="job-details">
+                    <div className="job-detail">
+                      <i className='bx bx-map'></i>
+                      <span>{job.location}</span>
+                    </div>
+                    <div className="job-detail">
+                      <i className='bx bx-briefcase'></i>
+                      <span>{job.type.charAt(0).toUpperCase() + job.type.slice(1)}</span>
+                    </div>
+                    {job.salary && (
+                      <div className="job-detail">
+                        <i className='bx bx-money'></i>
+                        <span>{job.salary}</span>
+                      </div>
+                    )}
+                  </div>
+                  {job.skills && job.skills.length > 0 && (
+                    <div className="job-skills">
+                      {job.skills.slice(0, 4).map((skill, index) => (
+                        <span key={index} className="job-skill">{skill}</span>
+                      ))}
+                      {job.skills.length > 4 && <span className="job-skill-more">+{job.skills.length - 4}</span>}
+                    </div>
+                  )}
+                </div>
+                <div className="job-card-footer">
+                  <div className="job-posted">
+                    <i className='bx bx-calendar'></i>
+                    <span>{formatDate(job.createdAt)}</span>
+                  </div>
+                  <a href={`/jobs/${job._id}`} className="job-view-btn">View Details</a>
+                  <button className="job-save-btn saved" onClick={() => handleUnsaveJob(job._id)} title="Unsave Job" aria-label="Unsave Job">
+                    <i className="fas fa-bookmark"></i>
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       ) : (
         <div className="jobs-grid">
@@ -240,11 +356,20 @@ function Jobs() {
                   <span>{formatDate(job.createdAt)}</span>
                 </div>
                 <a href={`/jobs/${job._id}`} className="job-view-btn">View Details</a>
+                {savedJobs.includes(job._id) ? (
+                  <button className="job-save-btn saved" onClick={() => handleUnsaveJob(job._id)} title="Unsave Job" aria-label="Unsave Job">
+                    <i className="fas fa-bookmark"></i>
+                  </button>
+                ) : (
+                  <button className="job-save-btn" onClick={() => handleSaveJob(job._id)} title="Save Job" aria-label="Save Job">
+                    <i className="far fa-bookmark"></i>
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
-      )}
+      ))}
     </div>
   );
 }

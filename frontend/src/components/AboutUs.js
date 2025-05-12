@@ -222,15 +222,27 @@ function AboutUs() {
             Working together to strengthen Lebanon's hospitality ecosystem
           </p>
           <div className="partners-grid">
-            {partnerships.map((partner, index) => (
-              <div className="partner-card" key={index}>
-                <div className="partner-logo">
-                  <i className="fas fa-handshake"></i>
+            <div className="partners-scroll-wrapper">
+              {partnerships.map((partner, index) => (
+                <div className="partner-card" key={index}>
+                  <div className="partner-logo">
+                    <i className="fas fa-handshake"></i>
+                  </div>
+                  <h3>{partner.name}</h3>
+                  <p>{partner.description}</p>
                 </div>
-                <h3>{partner.name}</h3>
-                <p>{partner.description}</p>
-              </div>
-            ))}
+              ))}
+              {/* Duplicate for seamless infinite scroll */}
+              {partnerships.map((partner, index) => (
+                <div className="partner-card" key={`dup-${index}`}> 
+                  <div className="partner-logo">
+                    <i className="fas fa-handshake"></i>
+                  </div>
+                  <h3>{partner.name}</h3>
+                  <p>{partner.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

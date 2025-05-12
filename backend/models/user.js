@@ -61,6 +61,10 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User'
   }],
+  savedJobs: [{
+    type: mongoose.Schema.ObjectId,
+    ref: 'Job'
+  }],
   settings: {
     emailNotifications: {
       jobAlerts: { type: Boolean, default: true },
@@ -124,4 +128,4 @@ userSchema.methods.correctPassword = async function(candidatePassword) {
   }
 };
 
-export default mongoose.model('User', userSchema); 
+export default mongoose.models.User || mongoose.model('User', userSchema); 
