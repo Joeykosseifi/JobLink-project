@@ -181,6 +181,9 @@ const UserAccount = () => {
     return <div className="user-account-error">{error}</div>;
   }
 
+  // Check if user is an admin
+  const isAdmin = user && user.role === 'admin';
+
   return (
     <div className="user-account-page">
       <div className="user-account-container">
@@ -217,10 +220,18 @@ const UserAccount = () => {
           <div className="profile-details">
             <h2>{formData.name}</h2>
             <p className="profile-title">{formData.title || 'No title specified'}</p>
-            <div className="job-role-badge">
-              <i className={`fas ${formData.jobRole === 'job-seeker' ? 'fa-search' : 'fa-briefcase'}`}></i>
-              {formData.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
-            </div>
+            {!isAdmin && (
+              <div className="job-role-badge">
+                <i className={`fas ${formData.jobRole === 'job-seeker' ? 'fa-search' : 'fa-briefcase'}`}></i>
+                {formData.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
+              </div>
+            )}
+            {isAdmin && (
+              <div className="job-role-badge admin">
+                <i className="fas fa-user-shield"></i>
+                Administrator
+              </div>
+            )}
           </div>
         </div>
 
@@ -261,38 +272,40 @@ const UserAccount = () => {
             />
           </div>
           
-          <div className="form-group">
-            <label>I am a:</label>
-            <div className="job-role-selection">
-              <label className={`job-role-option ${formData.jobRole === 'job-seeker' ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="jobRole"
-                  value="job-seeker"
-                  checked={formData.jobRole === 'job-seeker'}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                />
-                <i className="fas fa-search"></i>
-                <span>Job Seeker</span>
-                <p className="role-description">I'm looking for job opportunities</p>
-              </label>
-              
-              <label className={`job-role-option ${formData.jobRole === 'job-poster' ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="jobRole"
-                  value="job-poster"
-                  checked={formData.jobRole === 'job-poster'}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                />
-                <i className="fas fa-briefcase"></i>
-                <span>Job Poster</span>
-                <p className="role-description">I'm hiring and posting job offers</p>
-              </label>
+          {!isAdmin && (
+            <div className="form-group">
+              <label>I am a:</label>
+              <div className="job-role-selection">
+                <label className={`job-role-option ${formData.jobRole === 'job-seeker' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="jobRole"
+                    value="job-seeker"
+                    checked={formData.jobRole === 'job-seeker'}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                  />
+                  <i className="fas fa-search"></i>
+                  <span>Job Seeker</span>
+                  <p className="role-description">I'm looking for job opportunities</p>
+                </label>
+                
+                <label className={`job-role-option ${formData.jobRole === 'job-poster' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="jobRole"
+                    value="job-poster"
+                    checked={formData.jobRole === 'job-poster'}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                  />
+                  <i className="fas fa-briefcase"></i>
+                  <span>Job Poster</span>
+                  <p className="role-description">I'm hiring and posting job offers</p>
+                </label>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="form-group">
             <label>Bio</label>

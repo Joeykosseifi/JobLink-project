@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './AdminMessages.css';
+import { useDialog } from './DialogContext';
+import { useNotification } from './NotificationContext';
 
 function AdminMessages() {
   const [messages, setMessages] = useState([]);
@@ -8,6 +10,8 @@ function AdminMessages() {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const { showConfirmDialog } = useDialog();
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -34,13 +38,14 @@ function AdminMessages() {
       } catch (error) {
         console.error('Error fetching messages:', error);
         setError(error.message);
+        showNotification(error.message, 'error');
       } finally {
         setLoading(false);
       }
     };
     
     fetchMessages();
-  }, []);
+  }, [showNotification]);
 
   const handleMarkAsRead = async (id) => {
     try {
@@ -65,9 +70,12 @@ function AdminMessages() {
       setMessages(messages.map(message => 
         message._id === id ? { ...message, isRead: true } : message
       ));
+      
+      showNotification('Message marked as read', 'success');
     } catch (error) {
       console.error('Error marking message as read:', error);
       setError(error.message);
+      showNotification(error.message, 'error');
     }
   };
 
@@ -98,10 +106,24 @@ function AdminMessages() {
         setShowModal(false);
         setSelectedMessage(null);
       }
+      
+      showNotification('Message deleted successfully', 'success');
     } catch (error) {
       console.error('Error deleting message:', error);
       setError(error.message);
+      showNotification(error.message, 'error');
     }
+  };
+
+  const confirmDeleteMessage = (id) => {
+    showConfirmDialog({
+      title: 'Delete Message',
+      message: 'Are you sure you want to delete this message? This action cannot be undone.',
+      onConfirm: () => handleDeleteMessage(id),
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonClass: 'btn-danger'
+    });
   };
 
   const openMessageModal = (message) => {
@@ -392,9 +414,7 @@ function AdminMessages() {
                           className="action-btn delete-btn"
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (window.confirm('Are you sure you want to delete this message?')) {
-                              handleDeleteMessage(message._id);
-                            }
+                            confirmDeleteMessage(message._id);
                           }}
                           title="Delete Message"
                         >
@@ -442,11 +462,7 @@ function AdminMessages() {
                 </a>
                 <button 
                   className="delete-message-btn"
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to delete this message?')) {
-                      handleDeleteMessage(selectedMessage._id);
-                    }
-                  }}
+                  onClick={() => confirmDeleteMessage(selectedMessage._id)}
                 >
                   <i className="fas fa-trash"></i>
                   Delete Message

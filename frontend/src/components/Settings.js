@@ -272,19 +272,45 @@ const Settings = () => {
       onConfirm: async () => {
         try {
           const token = localStorage.getItem('token');
-          await axios.delete('http://localhost:5000/api/settings/account', {
+          console.log('Deleting account, token exists:', !!token);
+          
+          // Log the full request details for debugging
+          console.log('Making DELETE request to:', 'http://localhost:5000/api/settings/account');
+          console.log('With headers:', { Authorization: `Bearer ${token ? token.substring(0, 10) + '...' : 'none'}` });
+          
+          const response = await axios.delete('http://localhost:5000/api/settings/account', {
             headers: {
               Authorization: `Bearer ${token}`
             }
           });
+          
+          console.log('Delete account response:', response.data);
           
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           showNotification('Your account has been deleted successfully', 'success');
           navigate('/');
         } catch (err) {
-          const errorMessage = err.response?.data?.message || 'Failed to delete account';
-          showNotification(errorMessage, 'error');
+          console.error('Full delete account error:', err);
+          
+          // More detailed error handling
+          if (err.response) {
+            // The server responded with a status code outside of 2xx
+            console.error('Server error response:', {
+              status: err.response.status,
+              data: err.response.data
+            });
+            const errorMessage = err.response.data.message || 'Failed to delete account';
+            showNotification(`Error (${err.response.status}): ${errorMessage}`, 'error');
+          } else if (err.request) {
+            // The request was made but no response was received
+            console.error('No response received from server');
+            showNotification('Server not responding. Please try again later.', 'error');
+          } else {
+            // Something happened in setting up the request
+            console.error('Error setting up request:', err.message);
+            showNotification('Error preparing request: ' + err.message, 'error');
+          }
         }
       }
     });

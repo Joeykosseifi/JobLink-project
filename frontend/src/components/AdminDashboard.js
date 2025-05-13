@@ -251,7 +251,7 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
     // Role filter
     const roleMatch = 
       roleFilter === 'all' || 
-      user.role === roleFilter;
+      user.jobRole === roleFilter;
     
     // Status filter
     const statusMatch = 
@@ -524,9 +524,8 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                   }}
                 >
                   <option value="all">All Roles</option>
-                  <option value="admin">Admin</option>
-                  <option value="user">User</option>
-                  <option value="employer">Employer</option>
+                  <option value="job-seeker">Job Seeker</option>
+                  <option value="job-poster">Job Poster</option>
                 </select>
                 <select 
                   className="filter-select"
@@ -563,7 +562,9 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                         <td>{user.name}</td>
                         <td>{user.email}</td>
                         <td>
-                          <span className={`role-badge ${user.role}`}>{user.role}</span>
+                          <span className={`role-badge ${user.jobRole}`}>
+                            {user.jobRole === 'job-seeker' ? 'Job Seeker' : 'Job Poster'}
+                          </span>
                         </td>
                         <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                         <td>

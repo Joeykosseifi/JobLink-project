@@ -276,6 +276,13 @@
   background: linear-gradient(to right, #0077b5, #0a66c2);
 }
 
+/* Admin badge styling */
+.job-role-badge.admin {
+  background: linear-gradient(to right, #6b21a8, #8b5cf6);
+  color: white;
+  font-weight: 700;
+}
+
 .job-role-badge i {
   font-size: 0.8rem;
 }

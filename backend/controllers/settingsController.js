@@ -71,4 +71,38 @@ export const updateSettings = async (req, res) => {
     console.error('Error updating settings:', error);
     res.status(500).json({ message: 'Error updating settings' });
   }
+};
+
+// Delete user account
+export const deleteAccount = async (req, res) => {
+  try {
+    console.log('Delete account request received');
+    const userId = req.user.id;
+    console.log('User ID from request:', userId);
+    
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      console.log('User not found in database');
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    console.log('User found:', user.email);
+
+    // Delete the user (You can also implement soft delete by setting active: false)
+    console.log('Attempting to delete user...');
+    await User.findByIdAndDelete(userId);
+    console.log('User successfully deleted');
+    
+    res.status(200).json({ 
+      success: true,
+      message: 'Account deleted successfully' 
+    });
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error deleting account' 
+    });
+  }
 }; 

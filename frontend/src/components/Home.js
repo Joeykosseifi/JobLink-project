@@ -87,15 +87,20 @@ function Home() {
       
       if (response.data && response.data.success) {
         const stats = response.data.data;
-        animateCounters(stats.jobs, stats.seekers, stats.companies);
+        // Use actual values from API, even if they're zero
+        animateCounters(
+          stats.jobs || 0, 
+          stats.seekers || 0, 
+          stats.companies || 0
+        );
       } else {
-        // Fallback to sample data if API format is unexpected
-        animateCounters(2450, 3200, 350);
+        // If API format is unexpected, show zeros instead of fake data
+        animateCounters(0, 0, 0);
       }
     } catch (error) {
       console.error('Error fetching live stats:', error);
-      // Fallback to sample data if API fails
-      animateCounters(2450, 3200, 350);
+      // If API fails, show zeros instead of fake data
+      animateCounters(0, 0, 0);
     } finally {
       setLiveStatsLoading(false);
     }

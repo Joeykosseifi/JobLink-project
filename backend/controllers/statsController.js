@@ -6,36 +6,49 @@ import asyncHandler from 'express-async-handler';
 // @route   GET /api/stats
 // @access  Public
 export const getStats = asyncHandler(async (req, res) => {
+  console.log('getStats endpoint called - checking live statistics');
+  
   try {
-    // Get total job count - with fallback
+    // Get total job count
     let jobCount = 0;
     try {
-      jobCount = await Job.countDocuments() || 2450;
+      jobCount = await Job.countDocuments();
+      console.log(`Found ${jobCount} jobs in database`);
     } catch (err) {
       console.error('Error counting jobs:', err);
-      jobCount = 2450; // Fallback value
     }
     
-    // Get total job seekers - with fallback
+    // Get total job seekers - excluding admin users
     let seekerCount = 0;
     try {
-      seekerCount = await User.countDocuments({ role: 'candidate' }) || 3200;
+      seekerCount = await User.countDocuments({ 
+        jobRole: 'job-seeker',
+        role: { $ne: 'admin' } // Exclude admin users
+      });
+      console.log(`Found ${seekerCount} job seekers in database (excluding admins)`);
     } catch (err) {
       console.error('Error counting job seekers:', err);
-      seekerCount = 3200; // Fallback value
     }
     
-    // Get total companies hiring - with fallback
+    // Get total companies/job posters - excluding admin users
     let companyCount = 0;
     try {
-      const activeCompanyIds = await Job.distinct('company', { status: 'active' });
-      companyCount = activeCompanyIds.length || 350;
+      companyCount = await User.countDocuments({ 
+        jobRole: 'job-poster',
+        role: { $ne: 'admin' } // Exclude admin users
+      });
+      console.log(`Found ${companyCount} job posters in database (excluding admins)`);
     } catch (err) {
       console.error('Error counting companies:', err);
-      companyCount = 350; // Fallback value
     }
     
     // Return statistics
+    console.log('Returning statistics:', {
+      jobs: jobCount,
+      seekers: seekerCount,
+      companies: companyCount
+    });
+    
     res.status(200).json({
       success: true,
       data: {
@@ -47,15 +60,9 @@ export const getStats = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('Stats error:', error);
-    // Return fallback data instead of an error
-    res.status(200).json({
-      success: true,
-      data: {
-        jobs: 2450,
-        seekers: 3200,
-        companies: 350,
-        lastUpdated: new Date().toISOString()
-      }
+    res.status(500).json({
+      success: false,
+      error: 'Server error when retrieving statistics'
     });
   }
 }); 

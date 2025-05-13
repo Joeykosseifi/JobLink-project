@@ -58,7 +58,11 @@ app.get('/api/test', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Add logging for the settings routes
+console.log('Registering settings routes at /api/settings');
 app.use('/api/settings', settingsRoutes);
+
 app.use('/api/jobs', jobRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/applications', applicationRoutes);

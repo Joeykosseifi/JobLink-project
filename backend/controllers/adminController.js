@@ -4,7 +4,8 @@ import Message from '../models/Message.js';
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    // Fetch only non-admin users
+    const users = await User.find({ role: { $ne: 'admin' } }).select('-password');
     
     return res.status(200).json({
       status: 'success',
@@ -119,18 +120,19 @@ export const getAnalyticsData = async (req, res) => {
       compareStartDate.setDate(compareStartDate.getDate() - 30);
     }
     
-    // Get current period data
+    // Get current period data - exclude admin users
     const [totalUsers, activeUsers, totalJobs, activeJobs, totalMessages] = await Promise.all([
-      User.countDocuments(),
-      User.countDocuments({ active: true }),
+      User.countDocuments({ role: { $ne: 'admin' } }),
+      User.countDocuments({ active: true, role: { $ne: 'admin' } }),
       Job.countDocuments(),
       Job.countDocuments({ active: true }),
       Message.countDocuments()
     ]);
     
-    // Get new users in current period
+    // Get new users in current period - exclude admin users
     const newUsers = await User.countDocuments({ 
-      createdAt: { $gte: startDate } 
+      createdAt: { $gte: startDate },
+      role: { $ne: 'admin' }
     });
     
     // Get new jobs in current period
@@ -141,10 +143,11 @@ export const getAnalyticsData = async (req, res) => {
     // Get new applications in current period (assuming applications are linked to jobs)
     const newApplications = 46; // This would be a real count from your database
     
-    // Get previous period data for growth calculations
+    // Get previous period data for growth calculations - exclude admin users
     const [prevPeriodUsers, prevPeriodJobs] = await Promise.all([
       User.countDocuments({ 
-        createdAt: { $gte: compareStartDate, $lt: startDate } 
+        createdAt: { $gte: compareStartDate, $lt: startDate },
+        role: { $ne: 'admin' }
       }),
       Job.countDocuments({ 
         createdAt: { $gte: compareStartDate, $lt: startDate } 

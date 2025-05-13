@@ -568,6 +568,10 @@
 /* Users Table Styles */
 .users-table-container {
   overflow-x: auto;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
 }
 
 .users-table {
@@ -599,12 +603,37 @@
   background-color: rgba(66, 153, 225, 0.05);
 }
 
+/* Users Table - Role Column Highlight */
+.users-table td:nth-child(3) {
+  position: relative;
+}
+
+.users-table td:nth-child(3)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.users-table tr:hover td:nth-child(3)::after {
+  opacity: 1;
+}
+
+/* Role badges */
 .role-badge {
   padding: 0.35rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .role-badge.admin {
@@ -623,6 +652,52 @@
   background-color: rgba(10, 102, 194, 0.08);
   color: #0a66c2; /* LinkedIn blue */
   border: 1px solid #0a66c2;
+}
+
+/* Job Seeker Badge */
+.role-badge.job-seeker {
+  background-color: rgba(72, 187, 120, 0.15);
+  color: #2f855a;
+  border: 1px solid #2f855a;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.role-badge.job-seeker:hover {
+  background-color: rgba(72, 187, 120, 0.25);
+  box-shadow: 0 2px 5px rgba(47, 133, 90, 0.2);
+  transform: translateY(-1px);
+}
+
+.role-badge.job-seeker::before {
+  content: "\f002"; /* Font Awesome search icon */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 0.7rem;
+  margin-right: 3px;
+}
+
+/* Job Poster Badge */
+.role-badge.job-poster {
+  background-color: rgba(236, 201, 75, 0.15);
+  color: #b7791f;
+  border: 1px solid #b7791f;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.role-badge.job-poster:hover {
+  background-color: rgba(236, 201, 75, 0.25);
+  box-shadow: 0 2px 5px rgba(183, 121, 31, 0.2);
+  transform: translateY(-1px);
+}
+
+.role-badge.job-poster::before {
+  content: "\f0b1"; /* Font Awesome briefcase icon */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  font-size: 0.7rem;
+  margin-right: 3px;
 }
 
 .status-badge {
@@ -752,12 +827,24 @@
   background-position: right 0.75rem center;
   background-size: 16px 12px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .filter-select:focus {
   outline: none;
   border-color: #0a66c2; /* LinkedIn blue */
   box-shadow: 0 0 0 3px rgba(10, 102, 194, 0.15);
+}
+
+/* Style for the role filter dropdown */
+.filter-select option[value="job-seeker"] {
+  color: #2f855a;
+  font-weight: 500;
+}
+
+.filter-select option[value="job-poster"] {
+  color: #b7791f;
+  font-weight: 500;
 }
 
 /* Pagination Styles */

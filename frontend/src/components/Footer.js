@@ -34,33 +34,23 @@ const Footer = () => {
           </div>
 
           <div className="footer-col">
-            <h3>For Job Seekers</h3>
+            <h3>Users</h3>
             <ul>
               <li><Link to="/jobs" aria-label="Browse Jobs">Browse Jobs</Link></li>
-              <li><Link to="/account" aria-label="My Account">My Account</Link></li>
-              <li><Link to="/resume" aria-label="Upload Resume">Upload Resume</Link></li>
-              <li><Link to="/saved-jobs" aria-label="Saved Jobs">Saved Jobs</Link></li>
-              <li><Link to="/job-alerts" aria-label="Job Alerts">Job Alerts</Link></li>
-            </ul>
-          </div>
-
-          <div className="footer-col">
-            <h3>For Employers</h3>
-            <ul>
-              <li><Link to="/post-job" aria-label="Post a Job">Post a Job</Link></li>
-              <li><Link to="/pricing" aria-label="Pricing">Pricing</Link></li>
-              <li><Link to="/employer-resources" aria-label="Employer Resources">Resources</Link></li>
-              <li><Link to="/employer-dashboard" aria-label="Employer Dashboard">Dashboard</Link></li>
-              <li><Link to="/applicant-tracking" aria-label="Applicant Tracking">Applicant Tracking</Link></li>
+              <li><Link to="/user/account" aria-label="My Account">My Account</Link></li>
+              <li><Link to="/jobs" aria-label="Saved Jobs">Saved Jobs</Link></li>
+              <li><Link to="/postjob" aria-label="Post a Job">Post a Job</Link></li>
             </ul>
           </div>
 
           <div className="footer-col">
             <h3>Company</h3>
             <ul>
+              <li><Link to="/" aria-label="Home">Home</Link></li>
               <li><Link to="/about" aria-label="About Us">About Us</Link></li>
               <li><Link to="/contact" aria-label="Contact Us">Contact Us</Link></li>
-              <li><Link to="/contact" aria-label="Support">Support</Link></li>
+              <li><Link to="/terms" aria-label="Terms and Conditions">Terms and Conditions</Link></li>
+              <li><Link to="/privacy" aria-label="Privacy Policy">Privacy Policy</Link></li>
             </ul>
           </div>
 
@@ -82,10 +72,8 @@ const Footer = () => {
           <div className="footer-legal">
             <p>&copy; {currentYear} JobLink. All rights reserved.</p>
             <div className="footer-links">
-              <Link to="/terms" aria-label="Terms of Service">Terms of Service</Link>
-              <Link to="/privacy" aria-label="Privacy Policy">Privacy Policy</Link>
-              <Link to="/accessibility" aria-label="Accessibility">Accessibility</Link>
-              <Link to="/sitemap" aria-label="Sitemap">Sitemap</Link>
+              <Link to="/about" aria-label="Accessibility">Accessibility</Link>
+              <Link to="/about" aria-label="Sitemap">Sitemap</Link>
             </div>
           </div>
         </div>

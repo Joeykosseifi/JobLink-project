@@ -13,6 +13,8 @@ import Footer from './components/Footer';
 import NotFound from './components/NotFound';
 import MyNetwork from './components/MyNetwork';
 import ProtectedRoute from './components/ProtectedRoute';
+import TermsOfService from './components/TermsOfService';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 import PostJob from './components/PostJob';
 import AdminDashboard from './components/AdminDashboard';
@@ -46,6 +48,8 @@ const AppContent = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
         {/* Network route is now protected and not accessible to admins */}
         <Route path="/network" element={
           <ProtectedRoute 
