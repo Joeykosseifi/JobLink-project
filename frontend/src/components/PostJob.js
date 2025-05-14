@@ -130,7 +130,21 @@ function PostJob() {
       setSuccess(true);
       setLoading(false);
       
+      // Update the user's jobRole in localStorage
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        user.jobRole = 'job-poster';
+        localStorage.setItem('user', JSON.stringify(user));
+        console.log('Updated user jobRole in localStorage to job-poster');
+      }
+      
       showNotification('Job posted successfully!', 'success');
+      
+      // After a short delay, show a second notification about the user role change
+      setTimeout(() => {
+        showNotification('Your account has been updated to Job Poster status!', 'info');
+      }, 1500);
       
       // Reset form after successful submission
       setFormData({

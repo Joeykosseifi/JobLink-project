@@ -23,35 +23,81 @@ const UserAccount = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (!userData) {
-      navigate('/login');
-      return;
-    }
-    
-    try {
-      const parsedUser = JSON.parse(userData);
-      console.log('Loaded user data:', parsedUser);
-      console.log('User ID:', parsedUser._id || parsedUser.id);
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
       
-      setUser(parsedUser);
-      setFormData({
-        name: parsedUser.name,
-        email: parsedUser.email,
-        title: parsedUser.title || '',
-        bio: parsedUser.bio || '',
-        profileImage: parsedUser.profileImage || '',
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-        jobRole: parsedUser.jobRole || 'job-seeker' // Load existing job role or default to job-seeker
-      });
-      setLoading(false);
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      setError('Error loading user data');
-      setLoading(false);
-    }
+      if (!token || !userData) {
+        navigate('/login');
+        return;
+      }
+      
+      try {
+        // First load from localStorage for immediate display
+        const parsedUser = JSON.parse(userData);
+        console.log('Loaded user data from localStorage:', parsedUser);
+        
+        setUser(parsedUser);
+        setFormData({
+          name: parsedUser.name,
+          email: parsedUser.email,
+          title: parsedUser.title || '',
+          bio: parsedUser.bio || '',
+          profileImage: parsedUser.profileImage || '',
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+          jobRole: parsedUser.jobRole || 'job-seeker'
+        });
+        
+        // Then fetch the latest user data from the server
+        const response = await axios.get('http://localhost:5000/api/users/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.data && response.data.user) {
+          const freshUserData = response.data.user;
+          console.log('Fetched fresh user data from server:', freshUserData);
+          
+          // Update localStorage with the latest user data
+          const updatedUser = {
+            ...parsedUser,
+            ...freshUserData,
+            _id: parsedUser._id || parsedUser.id
+          };
+          
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          
+          // Update state with fresh data
+          setUser(updatedUser);
+          setFormData(prev => ({
+            ...prev,
+            name: freshUserData.name || prev.name,
+            email: freshUserData.email || prev.email,
+            title: freshUserData.title || prev.title || '',
+            bio: freshUserData.bio || prev.bio || '',
+            profileImage: freshUserData.profileImage || prev.profileImage || '',
+            jobRole: freshUserData.jobRole || prev.jobRole || 'job-seeker'
+          }));
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        
+        // If we can't fetch from the server, still allow using localStorage data
+        if (setUser) {
+          setLoading(false);
+        } else {
+          setError('Error loading user data');
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchUserData();
   }, [navigate]);
 
   const handleChange = (e) => {

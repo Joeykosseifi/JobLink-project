@@ -6,7 +6,8 @@ import {
   sendConnectionRequest,
   acceptConnectionRequest,
   rejectConnectionRequest,
-  getUserConnections
+  getUserConnections,
+  getMe
 } from '../controllers/userController.js';
 import User from '../models/user.js';
 import Job from '../models/Job.js';
@@ -14,6 +15,7 @@ import Job from '../models/Job.js';
 const router = express.Router();
 
 // Protected routes (require authentication)
+router.get('/me', protect, getMe);
 router.put('/update-profile', protect, updateProfile);
 router.get('/', protect, getAllUsers);
 

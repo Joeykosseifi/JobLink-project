@@ -1,4 +1,5 @@
 import Job from '../models/Job.js';
+import User from '../models/User.js';
 
 // Create a new job
 export const createJob = async (req, res) => {
@@ -10,6 +11,9 @@ export const createJob = async (req, res) => {
     // If the user is authenticated, add the postedBy field
     if (req.user) {
       jobData.postedBy = req.user.id;
+      
+      // Update user's jobRole to job-poster if they post a job
+      await User.findByIdAndUpdate(req.user.id, { jobRole: 'job-poster' });
     }
 
     const job = await Job.create(jobData);
