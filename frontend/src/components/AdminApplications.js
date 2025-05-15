@@ -201,11 +201,14 @@ function AdminApplications() {
 
   // Filter applications based on search and status filter
   const filteredApplications = applications.filter(app => {
-    // Search filter (search by applicant name, email, job title, or company)
+    // Search filter (search by applicant name, email, phone, job title, or company)
     const searchMatch = 
       search === '' || 
-      app.applicantId.name.toLowerCase().includes(search.toLowerCase()) ||
-      app.applicantId.email.toLowerCase().includes(search.toLowerCase()) ||
+      (app.fullName && app.fullName.toLowerCase().includes(search.toLowerCase())) ||
+      (app.email && app.email.toLowerCase().includes(search.toLowerCase())) ||
+      (app.phone && app.phone.toLowerCase().includes(search.toLowerCase())) ||
+      (app.applicantId && app.applicantId.name && app.applicantId.name.toLowerCase().includes(search.toLowerCase())) ||
+      (app.applicantId && app.applicantId.email && app.applicantId.email.toLowerCase().includes(search.toLowerCase())) ||
       app.jobId.title.toLowerCase().includes(search.toLowerCase()) ||
       app.jobId.company.toLowerCase().includes(search.toLowerCase());
     
@@ -552,8 +555,9 @@ function AdminApplications() {
                   <tr key={app._id}>
                     <td>
                       <div className="applicant-info">
-                        <span className="applicant-name">{app.applicantId.name}</span>
-                        <span className="applicant-email">{app.applicantId.email}</span>
+                        <span className="applicant-name">{app.fullName || app.applicantId.name}</span>
+                        <span className="applicant-email">{app.email || app.applicantId.email}</span>
+                        {app.phone && <span className="applicant-phone">{app.phone}</span>}
                       </div>
                     </td>
                     <td>{app.jobId.title}</td>

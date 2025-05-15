@@ -118,6 +118,13 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
 
   const handleEditUser = useCallback(async (userId) => {
     try {
+      // Validate userId
+      if (!userId || typeof userId !== 'string') {
+        console.error('Invalid userId:', userId);
+        showNotification('Invalid user ID', 'error');
+        return;
+      }
+      
       const user = users.find(u => u._id === userId);
       if (!user) {
         throw new Error('User not found');
@@ -135,21 +142,30 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
         initialValues: { role: user.role },
         onSubmit: async (values) => {
           try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-            `http://localhost:5000/api/admin/users/${userId}`,
-              { role: values.role },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      await fetchUsers(); // Refresh the list
+            const token = localStorage.getItem('token');
+            console.log(`Updating user with ID: ${userId}`);
+            
+            const response = await axios.patch(
+                  `http://localhost:5000/api/admin/users/${userId}`,
+                    { role: values.role },
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              }
+            );
+            
+            console.log('Update response:', response);
+            await fetchUsers(); // Refresh the list
             showNotification('User updated successfully!');
           } catch (err) {
             console.error('Error updating user:', err);
+            console.error('Error details:', {
+              message: err.message,
+              response: err.response,
+              status: err.response?.status,
+              data: err.response?.data
+            });
             showNotification(err.response?.data?.message || 'Failed to update user', 'error');
           }
         }

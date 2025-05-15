@@ -334,6 +334,21 @@
   color: #0a66c2;
 }
 
+.menu-notification-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e74c3c;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 50%;
+  padding: 0 4px;
+  margin-left: 5px;
+}
+
 .dropdown-menu-item.logout {
   color: #dc2626;
 }
@@ -540,20 +555,29 @@
 
 .notification-badge {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: #e74c3c;
+  top: -5px;
+  right: -5px;
+  background-color: #f44336;
   color: white;
   font-size: 0.7rem;
-  font-weight: bold;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  height: 18px;
+  width: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.upgrade-badge {
+  background-color: #ff9800;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 5px;
+  font-weight: bold;
+  text-transform: uppercase;
   animation: pulse 1.5s infinite;
 }
 

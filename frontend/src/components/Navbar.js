@@ -11,6 +11,7 @@ function Navbar() {
   const [recentAccounts, setRecentAccounts] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [connectionRequests, setConnectionRequests] = useState(0);
+  const [newJobsCount, setNewJobsCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const mobileMenuRef = useRef(null);
@@ -82,6 +83,25 @@ function Navbar() {
     }
   }, [isLoggedIn]);
 
+  const fetchNewJobsCount = useCallback(async () => {
+    try {
+      // In a real app, you would fetch this from your API
+      // Example: Check localStorage for the last time jobs were viewed
+      const lastJobCheck = localStorage.getItem('lastJobCheck');
+      const currentTime = new Date().getTime();
+      
+      // For demo purposes, simulate new jobs notification
+      // In real app, you would fetch the actual count of new jobs since lastJobCheck
+      if (!lastJobCheck || (currentTime - parseInt(lastJobCheck)) > 86400000) { // 24 hours
+        // Generate a random number between 1 and 5 for demo
+        const randomCount = Math.floor(Math.random() * 5) + 1;
+        setNewJobsCount(randomCount);
+      }
+    } catch (error) {
+      console.error('Error fetching new jobs count:', error);
+    }
+  }, []);
+
   // Check auth status on mount and when location changes
   useEffect(() => {
     checkAuthStatus();
@@ -93,18 +113,27 @@ function Navbar() {
   useEffect(() => {
     if (isLoggedIn) {
       fetchConnectionRequests();
+      fetchNewJobsCount();
       
       // Set up polling every 30 seconds to check for new connection requests
       const intervalId = setInterval(fetchConnectionRequests, 30000);
       
       return () => clearInterval(intervalId);
     }
-  }, [isLoggedIn, fetchConnectionRequests]);
+  }, [isLoggedIn, fetchConnectionRequests, fetchNewJobsCount]);
 
   // Reset connection requests when location changes to /network
   useEffect(() => {
     if (location.pathname === '/network') {
       setConnectionRequests(0);
+    }
+  }, [location.pathname]);
+
+  // Clear new jobs notification when going to Jobs page
+  useEffect(() => {
+    if (location.pathname === '/jobs') {
+      setNewJobsCount(0);
+      localStorage.setItem('lastJobCheck', new Date().getTime().toString());
     }
   }, [location.pathname]);
 
@@ -190,25 +219,11 @@ function Navbar() {
         </Link>
         <Link to="/jobs" className={`nav-link ${isActive('/jobs') ? 'active' : ''}`} onClick={handleNavLinkClick}>
           <i className="fas fa-briefcase"></i> Jobs
+          {newJobsCount > 0 && (
+            <span className="notification-badge">{newJobsCount}</span>
+          )}
         </Link>
-        <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={handleNavLinkClick}>
-          <i className="fas fa-envelope"></i> Contact Us
-        </Link>
-        
-        {isLoggedIn && user && user.role !== 'admin' && (
-          <Link to="/network" className={`nav-link ${isActive('/network') ? 'active' : ''}`} onClick={handleNavLinkClick}>
-            <i className="fas fa-users"></i> My Network
-            {connectionRequests > 0 && (
-              <span className="notification-badge">{connectionRequests}</span>
-            )}
-          </Link>
-        )}
-        
-        {isLoggedIn && user && user.role === 'admin' && (
-          <Link to="/admin/dashboard" className={`admin-link ${isActive('/admin') ? 'active' : ''}`} onClick={handleNavLinkClick}>
-            <i className="fas fa-shield-alt"></i> Admin
-          </Link>
-        )}
+                <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={handleNavLinkClick}>          <i className="fas fa-envelope"></i> Contact Us        </Link>        <Link to="/pricing" className={`nav-link ${isActive('/pricing') ? 'active' : ''}`} onClick={handleNavLinkClick}>          <i className="fas fa-tag"></i> Pricing          <span className="upgrade-badge">Upgrade</span>        </Link>                {isLoggedIn && user && user.role === 'admin' && (          <Link to="/admin/dashboard" className={`admin-link ${isActive('/admin') ? 'active' : ''}`} onClick={handleNavLinkClick}>            <i className="fas fa-shield-alt"></i> Admin          </Link>        )}
       </div>
       
       {isLoggedIn && user ? (
@@ -238,6 +253,47 @@ function Navbar() {
                   <i className="fas fa-user"></i>
                   My Account
                 </Link>
+                
+                {user.role !== 'admin' && (
+                  <>
+                    <Link 
+                      to="/network" 
+                      className="dropdown-menu-item" 
+                      onClick={() => setShowAccountMenu(false)}
+                    >
+                      <i className="fas fa-users"></i>
+                      My Network
+                      {connectionRequests > 0 && (
+                        <span className="menu-notification-badge">{connectionRequests}</span>
+                      )}
+                    </Link>
+                    
+                    {/* Only show My Applications link for job seekers */}
+                    {(user.jobRole === 'job-seeker' || !user.jobRole) && (
+                      <Link 
+                        to="/my-applications" 
+                        className="dropdown-menu-item" 
+                        onClick={() => setShowAccountMenu(false)}
+                      >
+                        <i className="fas fa-clipboard-list"></i>
+                        My Applications
+                      </Link>
+                    )}
+                    
+                    {/* Link for job posters to view applications for their jobs */}
+                    {(user.jobRole === 'job-poster' || user.role === 'admin') && (
+                      <Link 
+                        to="/job-applications" 
+                        className="dropdown-menu-item" 
+                        onClick={() => setShowAccountMenu(false)}
+                      >
+                        <i className="fas fa-clipboard-check"></i>
+                        Job Applications
+                      </Link>
+                    )}
+                  </>
+                )}
+                
                 <Link 
                   to="/settings" 
                   className="dropdown-menu-item" 

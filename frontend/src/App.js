@@ -12,6 +12,11 @@ import ContactUs from './components/ContactUs';
 import Footer from './components/Footer';
 import NotFound from './components/NotFound';
 import MyNetwork from './components/MyNetwork';
+import MyApplications from './components/MyApplications';
+import JobPosterApplications from './components/JobPosterApplications';
+import Pricing from './components/Pricing';
+import PaymentPage from './components/PaymentPage';
+import PaymentSuccess from './components/PaymentSuccess';
 import ProtectedRoute from './components/ProtectedRoute';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
@@ -35,7 +40,9 @@ const AppContent = () => {
   const hideFooter = 
     path.includes('/admin') || 
     path === '/signup' || 
-    path === '/login';
+    path === '/login' ||
+    path === '/payment' ||
+    path === '/payment-success';
 
   return (
     <div className="App">
@@ -46,6 +53,19 @@ const AppContent = () => {
         <Route path="/jobs/:id" element={<JobDetail />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/payment" element={
+          <ProtectedRoute 
+            element={<PaymentPage />}
+            adminAllowed={true}
+          />
+        } />
+        <Route path="/payment-success" element={
+          <ProtectedRoute 
+            element={<PaymentSuccess />}
+            adminAllowed={true}
+          />
+        } />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/terms" element={<TermsOfService />} />
@@ -55,6 +75,23 @@ const AppContent = () => {
           <ProtectedRoute 
             element={<MyNetwork />} 
             adminAllowed={false} 
+          />
+        } />
+        {/* My Applications route, protected and accessible only to job seekers */}
+        <Route path="/my-applications" element={
+          <ProtectedRoute 
+            element={<MyApplications />}
+            adminAllowed={true}
+            requiredRole="job-seeker"
+            allowNoRole={true}
+          />
+        } />
+        {/* Job Poster Applications route */}
+        <Route path="/job-applications" element={
+          <ProtectedRoute 
+            element={<JobPosterApplications />}
+            adminAllowed={true}
+            requiredRole="job-poster" 
           />
         } />
         <Route path="/postjob" element={<PostJob />} />

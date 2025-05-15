@@ -25,11 +25,30 @@ export const getAllUsers = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Validate id
+    if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid user ID format'
+      });
+    }
+    
     const { role, active } = req.body;
+    
+    // Validate input
+    if (role && !['user', 'admin'].includes(role)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid role value. Must be "user" or "admin"'
+      });
+    }
     
     const updateFields = {};
     if (role) updateFields.role = role;
     if (active !== undefined) updateFields.active = active;
+    
+    console.log(`Updating user ${id} with fields:`, updateFields);
     
     const user = await User.findByIdAndUpdate(
       id,
@@ -38,12 +57,14 @@ export const updateUser = async (req, res) => {
     ).select('-password');
 
     if (!user) {
+      console.log(`User with ID ${id} not found`);
       return res.status(404).json({
         status: 'fail',
         message: 'User not found'
       });
     }
 
+    console.log(`User ${id} updated successfully`);
     return res.status(200).json({
       status: 'success',
       data: {
@@ -54,7 +75,8 @@ export const updateUser = async (req, res) => {
     console.error('Error updating user:', error);
     return res.status(500).json({
       status: 'error',
-      message: 'Failed to update user'
+      message: 'Failed to update user',
+      details: error.message
     });
   }
 };

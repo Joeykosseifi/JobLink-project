@@ -8,7 +8,13 @@ const AccessDenied = ({ message }) => {
 };
 
 // Component to handle route protection based on user roles
-const ProtectedRoute = ({ element, adminAllowed = true, nonAdminAllowed = true }) => {
+const ProtectedRoute = ({ 
+  element, 
+  adminAllowed = true, 
+  nonAdminAllowed = true,
+  requiredRole = null,
+  allowNoRole = false
+}) => {
   // Check if user is logged in by looking for token
   const token = localStorage.getItem('token');
   if (!token) {
@@ -30,13 +36,24 @@ const ProtectedRoute = ({ element, adminAllowed = true, nonAdminAllowed = true }
     // If user is admin and admin is not allowed for this route
     if (isAdmin && !adminAllowed) {
       // Show 404 with custom message for admin trying to access non-admin routes
-      return <AccessDenied message="Administrators don't have access to the network page" />;
+      return <AccessDenied message="Administrators don't have access to this page" />;
     }
     
     // If user is not admin and non-admin is not allowed for this route
     if (!isAdmin && !nonAdminAllowed) {
       // Show 404 with custom message for non-admin trying to access admin-only routes
       return <AccessDenied message="You don't have permission to access this admin area" />;
+    }
+    
+    // Check for required role if specified
+    if (requiredRole && !isAdmin) {
+      // If role matches or no role is allowed and user has no role
+      const hasRequiredRole = user.jobRole === requiredRole;
+      const hasNoRoleAndAllowed = !user.jobRole && allowNoRole;
+      
+      if (!hasRequiredRole && !hasNoRoleAndAllowed) {
+        return <AccessDenied message={`This page is only accessible to users with ${requiredRole} role`} />;
+      }
     }
     
     // Otherwise, render the requested component

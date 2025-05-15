@@ -11,6 +11,24 @@ const applicationSchema = new mongoose.Schema({
     ref: 'User',
     required: [true, 'Applicant ID is required']
   },
+  fullName: {
+    type: String,
+    required: [true, 'Full name is required']
+  },
+  email: {
+    type: String,
+    required: [true, 'Email is required']
+  },
+  phone: {
+    type: String,
+    required: [true, 'Phone number is required']
+  },
+  currentCompany: {
+    type: String
+  },
+  linkedInProfile: {
+    type: String
+  },
   resume: {
     type: String,
     required: [true, 'Resume is required']

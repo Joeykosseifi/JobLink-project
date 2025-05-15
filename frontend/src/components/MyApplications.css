@@ -1,0 +1,302 @@
+.my-applications-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+.page-title {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.applications-summary {
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+.applications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.application-card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.application-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.application-header {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.job-info {
+  flex: 1;
+}
+
+.job-title {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 0.3rem;
+}
+
+.company-name {
+  font-size: 1rem;
+  color: #666;
+}
+
+.application-status {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background-color: #f0f7ff;
+  color: #2557a7;
+}
+
+.status-reviewed {
+  background-color: #f3f0ff;
+  color: #6b46c1;
+}
+
+.status-interviewed {
+  background-color: #e6fffa;
+  color: #319795;
+}
+
+.status-rejected {
+  background-color: #fff5f5;
+  color: #e53e3e;
+}
+
+.status-offered {
+  background-color: #fffbeb;
+  color: #d97706;
+}
+
+.status-hired {
+  background-color: #f0fff4;
+  color: #38a169;
+}
+
+.application-details {
+  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  background-color: #f9f9f9;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.detail-item i {
+  font-size: 1.5rem;
+  color: #2557a7;
+}
+
+.detail-item h3 {
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.detail-item p {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.documents-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.document-item {
+  padding: 0.3rem 0.75rem;
+  background-color: #f0f7ff;
+  color: #2557a7;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.application-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.view-job-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #fff;
+  color: #2557a7;
+  border: 1px solid #2557a7;
+  border-radius: 4px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.view-job-btn:hover {
+  background-color: #f0f7ff;
+  text-decoration: none;
+}
+
+/* Empty state styles */
+.no-applications {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.no-applications i {
+  font-size: 4rem;
+  color: #777;
+  margin-bottom: 1.5rem;
+}
+
+.no-applications h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.no-applications p {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.browse-jobs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #2557a7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.browse-jobs-btn:hover {
+  background-color: #1a4680;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(37, 87, 167, 0.3);
+  text-decoration: none;
+}
+
+/* Loading and error states */
+.my-applications-loading,
+.my-applications-error {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+  border: 5px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 5px solid #2557a7;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.my-applications-error i {
+  font-size: 4rem;
+  color: #777;
+  margin-bottom: 1.5rem;
+}
+
+.my-applications-error h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.my-applications-error p {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #2557a7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+  background-color: #1a4680;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .my-applications-container {
+    padding: 1.5rem;
+  }
+  
+  .application-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .application-status {
+    align-self: flex-start;
+  }
+  
+  .detail-item {
+    min-width: 100%;
+  }
+} 

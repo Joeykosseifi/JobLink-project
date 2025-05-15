@@ -224,6 +224,21 @@
   color: #718096;
 }
 
+.applicant-phone {
+  display: block;
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 3px;
+}
+
+.applicant-phone::before {
+  content: '\f095';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  margin-right: 5px;
+  color: #888;
+}
+
 /* Status Badges */
 .status-badge {
   display: inline-block;

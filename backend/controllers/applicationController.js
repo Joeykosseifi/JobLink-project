@@ -1,4 +1,5 @@
 import Application from '../models/Application.js';
+import Job from '../models/Job.js';
 
 // Get all applications (admin only)
 export const getAllApplications = async (req, res) => {
@@ -6,6 +7,7 @@ export const getAllApplications = async (req, res) => {
     const applications = await Application.find()
       .populate('jobId', 'title company location')
       .populate('applicantId', 'name email')
+      .select('jobId applicantId fullName email phone status resume coverLetter createdAt updatedAt')
       .sort({ createdAt: -1 });
     
     res.status(200).json({
@@ -29,7 +31,8 @@ export const getApplicationById = async (req, res) => {
   try {
     const application = await Application.findById(req.params.id)
       .populate('jobId', 'title company location salary description')
-      .populate('applicantId', 'name email');
+      .populate('applicantId', 'name email')
+      .select('jobId applicantId fullName email phone status resume coverLetter currentCompany linkedInProfile createdAt updatedAt');
     
     if (!application) {
       return res.status(404).json({
@@ -56,13 +59,51 @@ export const getApplicationById = async (req, res) => {
 // Submit a new application
 export const submitApplication = async (req, res) => {
   try {
-    const { jobId, resume, coverLetter } = req.body;
+    // Debug incoming request
+    console.log('Application submission request received');
+    console.log('Request body keys:', Object.keys(req.body));
+    console.log('File info:', req.file ? { 
+      filename: req.file.filename, 
+      path: req.file.path,
+      size: req.file.size,
+      mimetype: req.file.mimetype 
+    } : 'No file uploaded');
+    
+    const { 
+      jobId, 
+      fullName, 
+      email, 
+      phone, 
+      currentCompany, 
+      linkedInProfile 
+    } = req.body;
+    
+    // Debugging
+    console.log('Application submission payload:', {
+      jobId,
+      fullName,
+      email,
+      phone,
+      currentCompany,
+      linkedInProfile,
+      hasFile: !!req.file
+    });
+    
+    let coverLetter = req.body.coverLetter || '';
     
     // Ensure the user is authenticated
     if (!req.user) {
       return res.status(401).json({
         status: 'fail',
         message: 'You must be logged in to apply for a job'
+      });
+    }
+    
+    // Check if jobId is valid
+    if (!jobId) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Job ID is required'
       });
     }
     
@@ -79,13 +120,42 @@ export const submitApplication = async (req, res) => {
       });
     }
     
-    // Create new application
+    // Check if resume file was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please upload your resume/CV'
+      });
+    }
+    
+    // Check if required fields are provided
+    if (!fullName || !email || !phone) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Please provide your full name, email, and phone number'
+      });
+    }
+    
+    // Create new application with the file path and additional fields
     const application = await Application.create({
       jobId,
       applicantId: req.user.id,
-      resume,
+      fullName,
+      email,
+      phone,
+      currentCompany: currentCompany || '',
+      linkedInProfile: linkedInProfile || '',
+      resume: req.file.path, // Save file path from multer
       coverLetter,
       status: 'pending'
+    });
+    
+    // Debugging - verify saved application
+    console.log('Application saved successfully with fields:', {
+      id: application._id,
+      fullName: application.fullName,
+      email: application.email,
+      phone: application.phone
     });
     
     res.status(201).json({
@@ -116,6 +186,7 @@ export const getUserApplications = async (req, res) => {
     
     const applications = await Application.find({ applicantId: req.user.id })
       .populate('jobId', 'title company location')
+      .select('jobId fullName email phone status resume coverLetter currentCompany linkedInProfile createdAt')
       .sort({ createdAt: -1 });
     
     res.status(200).json({
@@ -218,6 +289,80 @@ export const deleteApplication = async (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'Failed to delete application'
+    });
+  }
+};
+
+// Get applications for jobs posted by the current user
+export const getJobPosterApplications = async (req, res) => {
+  try {
+    // Ensure the user is authenticated
+    if (!req.user) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'You must be logged in to view applications'
+      });
+    }
+    
+    // Check if user has the job-poster role or is an admin
+    if (req.user.jobRole !== 'job-poster' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        status: 'fail',
+        message: 'You do not have permission to view job applications'
+      });
+    }
+    
+    // First, get all jobs posted by this user
+    const jobs = await Job.find({ postedBy: req.user.id }).select('_id title company');
+    
+    if (jobs.length === 0) {
+      return res.status(200).json({
+        status: 'success',
+        results: 0,
+        data: {
+          jobsWithApplications: []
+        }
+      });
+    }
+    
+    // Get the job IDs
+    const jobIds = jobs.map(job => job._id);
+    
+    // Find all applications for these jobs
+    const applications = await Application.find({ jobId: { $in: jobIds } })
+      .populate('jobId', 'title company location')
+      .select('jobId fullName email phone currentCompany linkedInProfile resume coverLetter status createdAt')
+      .sort({ createdAt: -1 });
+    
+    // Create a response that includes both the job details and applications
+    const jobsWithApplications = jobs.map(job => {
+      const jobApplications = applications.filter(app => 
+        app.jobId._id.toString() === job._id.toString()
+      );
+      
+      return {
+        job: {
+          id: job._id,
+          title: job.title,
+          company: job.company
+        },
+        applications: jobApplications,
+        count: jobApplications.length
+      };
+    });
+    
+    res.status(200).json({
+      status: 'success',
+      results: applications.length,
+      data: {
+        jobsWithApplications
+      }
+    });
+  } catch (error) {
+    console.error('Error getting applications for posted jobs:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to get applications for your job postings'
     });
   }
 }; 
