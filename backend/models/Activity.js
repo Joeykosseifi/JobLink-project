@@ -9,7 +9,7 @@ const activitySchema = new mongoose.Schema({
   activityType: {
     type: String,
     required: true,
-    enum: ['login', 'signup', 'job_post', 'job_update', 'job_delete', 'job_application', 'message', 'payment', 'user_update', 'user_delete', 'admin_user_delete', 'connection_request', 'connection_accept']
+    enum: ['login', 'signup', 'job_post', 'job_update', 'job_delete', 'job_application', 'message', 'payment', 'user_update', 'user_delete', 'admin_user_delete', 'connection_request', 'connection_accept', 'subscription-update']
   },
   description: {
     type: String,

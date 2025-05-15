@@ -15,8 +15,8 @@ const SubscriptionNotification = () => {
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       const token = localStorage.getItem('token');
       
-      // If user is not logged in, hide notification
-      if (!token || !userData || !userData.subscriptionPlan) {
+      // If user is not logged in or is an admin, hide notification
+      if (!token || !userData || !userData.subscriptionPlan || userData.role === 'admin') {
         setVisible(false);
         // Clear notification data when logged out
         localStorage.removeItem('subscriptionNotification');

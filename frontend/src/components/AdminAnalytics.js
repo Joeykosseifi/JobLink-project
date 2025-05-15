@@ -113,50 +113,34 @@ function AdminAnalytics() {
   const chartData = getTimeframeData();
 
   // Helper functions for activity icons
-  const getActivityIcon = (activityType) => {
-    switch(activityType) {
-      case 'login':
-        return 'sign-in-alt';
-      case 'signup':
-        return 'user-plus';
-      case 'job_post':
-        return 'briefcase';
-      case 'job_application':
-        return 'file-alt';
-      case 'message':
-        return 'envelope';
-      case 'payment':
-        return 'credit-card';
-      case 'user_update':
-        return 'user-edit';
-      case 'job_update':
-        return 'edit';
-      default:
-        return 'bell';
+  const getActivityIcon = (type) => {
+    switch(type) {
+      case 'login': return 'sign-in-alt';
+      case 'signup': return 'user-plus';
+      case 'job_post': return 'briefcase';
+      case 'job_application': return 'file-alt';
+      case 'message': return 'envelope';
+      case 'payment': return 'credit-card';
+      case 'user_update': return 'user-edit';
+      case 'job_update': return 'edit';
+      case 'subscription-update': return 'crown';
+      default: return 'bell';
     }
   };
 
   // Helper function for activity classes
-  const getActivityClass = (activityType) => {
-    switch(activityType) {
-      case 'login':
-        return 'login';
-      case 'signup':
-        return 'new-user';
-      case 'job_post':
-        return 'new-job';
-      case 'job_application':
-        return 'application';
-      case 'message':
-        return 'message';
-      case 'payment':
-        return 'payment';
-      case 'user_update':
-        return 'update';
-      case 'job_update':
-        return 'update';
-      default:
-        return '';
+  const getActivityClass = (type) => {
+    switch(type) {
+      case 'login': return 'login';
+      case 'signup': return 'new-user';
+      case 'job_post': return 'new-job';
+      case 'job_application': return 'application';
+      case 'message': return 'message';
+      case 'payment': return 'payment';
+      case 'user_update': return 'update';
+      case 'job_update': return 'update';
+      case 'subscription-update': return 'subscription-update';
+      default: return '';
     }
   };
 
@@ -585,8 +569,8 @@ function AdminAnalytics() {
                 <div key={activity.id} className="activity-item">
                   <div className={`activity-icon ${getActivityClass(activity.type)}`}>
                     <i className={`fas fa-${getActivityIcon(activity.type)}`}></i>
-              </div>
-              <div className="activity-content">
+                  </div>
+                  <div className="activity-content">
                     <div className="activity-title">
                       {activity.type === 'login' && 'User Login'}
                       {activity.type === 'signup' && 'New User Registration'}
@@ -596,10 +580,11 @@ function AdminAnalytics() {
                       {activity.type === 'payment' && 'New Payment'}
                       {activity.type === 'user_update' && 'User Profile Updated'}
                       {activity.type === 'job_update' && 'Job Listing Updated'}
-              </div>
+                      {activity.type === 'subscription-update' && 'Subscription Plan Upgrade'}
+                    </div>
                     <div className="activity-desc">{activity.description}</div>
                     <div className="activity-time">{activity.time}</div>
-            </div>
+                  </div>
                 </div>
               ))
             ) : (

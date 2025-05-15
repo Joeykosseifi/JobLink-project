@@ -13,7 +13,7 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [planFilter, setPlanFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   // const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [activeTab, setActiveTab] = useState(initialActiveTab); // users or jobs
@@ -316,13 +316,12 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
       roleFilter === 'all' || 
       user.jobRole === roleFilter;
     
-    // Status filter
-    const statusMatch = 
-      statusFilter === 'all' || 
-      (statusFilter === 'active' && user.active) || 
-      (statusFilter === 'inactive' && !user.active);
+    // Plan filter
+    const planMatch = 
+      planFilter === 'all' || 
+      (user.subscriptionPlan || 'free') === planFilter;
     
-    return searchMatch && roleMatch && statusMatch;
+    return searchMatch && roleMatch && planMatch;
   });
 
   // Filter jobs based on search and filters
@@ -559,7 +558,8 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                       activity.type === 'message' ? 'envelope' :
                       activity.type === 'payment' ? 'credit-card' :
                       activity.type === 'user_update' ? 'user-edit' :
-                      activity.type === 'job_update' ? 'edit' : 'bell'
+                      activity.type === 'job_update' ? 'edit' :
+                      activity.type === 'subscription-update' ? 'crown' : 'bell'
                     }`}></i>
                   </div>
                   <div className="activity-content">
@@ -572,6 +572,7 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                       {activity.type === 'payment' && 'New Payment'}
                       {activity.type === 'user_update' && 'User Profile Updated'}
                       {activity.type === 'job_update' && 'Job Listing Updated'}
+                      {activity.type === 'subscription-update' && 'Subscription Plan Upgrade'}
                     </div>
                     <div className="activity-desc">{activity.description}</div>
                     <div className="activity-time">{activity.relativeTime}</div>
@@ -646,15 +647,16 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                 </select>
                 <select 
                   className="filter-select"
-                  value={statusFilter}
+                  value={planFilter}
                   onChange={(e) => {
-                    setStatusFilter(e.target.value);
+                    setPlanFilter(e.target.value);
                     setCurrentPage(1); // Reset to first page on filter change
                   }}
                 >
-                  <option value="all">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="all">All Plans</option>
+                  <option value="free">Free</option>
+                  <option value="premium">Premium</option>
+                  <option value="business">Business</option>
                 </select>
               </div>
             </div>
@@ -668,7 +670,7 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                     <th>Email</th>
                     <th>Role</th>
                     <th>Created At</th>
-                    <th>Status</th>
+                    <th>Subscription Plan</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -685,8 +687,10 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
                         </td>
                         <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                         <td>
-                          <span className={`status-badge ${user.active ? 'active' : 'inactive'}`}>
-                            {user.active ? 'Active' : 'Inactive'}
+                          <span className={`plan-badge ${user.subscriptionPlan || 'free'}`}>
+                            {user.subscriptionPlan ? 
+                              user.subscriptionPlan.charAt(0).toUpperCase() + user.subscriptionPlan.slice(1) : 
+                              'Free'}
                           </span>
                         </td>
                         <td>
