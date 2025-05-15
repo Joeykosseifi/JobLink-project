@@ -37,8 +37,7 @@ function AdminAnalytics() {
       growth: 0,
       newRevenue: 0,
       recurring: 0
-    },
-    recentActivities: []
+    }
   });
   
   // Create a ref for mockApplications to avoid dependency issues
@@ -112,38 +111,6 @@ function AdminAnalytics() {
 
   const chartData = getTimeframeData();
 
-  // Helper functions for activity icons
-  const getActivityIcon = (type) => {
-    switch(type) {
-      case 'login': return 'sign-in-alt';
-      case 'signup': return 'user-plus';
-      case 'job_post': return 'briefcase';
-      case 'job_application': return 'file-alt';
-      case 'message': return 'envelope';
-      case 'payment': return 'credit-card';
-      case 'user_update': return 'user-edit';
-      case 'job_update': return 'edit';
-      case 'subscription-update': return 'crown';
-      default: return 'bell';
-    }
-  };
-
-  // Helper function for activity classes
-  const getActivityClass = (type) => {
-    switch(type) {
-      case 'login': return 'login';
-      case 'signup': return 'new-user';
-      case 'job_post': return 'new-job';
-      case 'job_application': return 'application';
-      case 'message': return 'message';
-      case 'payment': return 'payment';
-      case 'user_update': return 'update';
-      case 'job_update': return 'update';
-      case 'subscription-update': return 'subscription-update';
-      default: return '';
-    }
-  };
-
   if (loading) {
     return (
       <div className="admin-dashboard">
@@ -163,6 +130,10 @@ function AdminAnalytics() {
             <Link to="/admin/analytics" className="menu-item active">
               <i className="fas fa-chart-line"></i>
               <span>Analytics</span>
+            </Link>
+            <Link to="/admin/activities" className="menu-item">
+              <i className="fas fa-history"></i>
+              <span>Recent Activities</span>
             </Link>
             
             <div className="menu-category">Management</div>
@@ -223,6 +194,10 @@ function AdminAnalytics() {
             <Link to="/admin/analytics" className="menu-item active">
               <i className="fas fa-chart-line"></i>
               <span>Analytics</span>
+            </Link>
+            <Link to="/admin/activities" className="menu-item">
+              <i className="fas fa-history"></i>
+              <span>Recent Activities</span>
             </Link>
             
             <div className="menu-category">Management</div>
@@ -291,6 +266,10 @@ function AdminAnalytics() {
           <Link to="/admin/analytics" className="menu-item active">
             <i className="fas fa-chart-line"></i>
             <span>Analytics</span>
+          </Link>
+          <Link to="/admin/activities" className="menu-item">
+            <i className="fas fa-history"></i>
+            <span>Recent Activities</span>
           </Link>
           
           <div className="menu-category">Management</div>
@@ -550,48 +529,6 @@ function AdminAnalytics() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        
-        <div className="analytics-recent-activity">
-          <div className="section-header">
-            <h2>Recent Activity</h2>
-            <div className="actions">
-              <button className="btn btn-secondary">
-                <i className="fas fa-download"></i> Export
-              </button>
-            </div>
-          </div>
-          
-          <div className="activity-list">
-            {analyticsData.recentActivities && analyticsData.recentActivities.length > 0 ? (
-              analyticsData.recentActivities.map((activity) => (
-                <div key={activity.id} className="activity-item">
-                  <div className={`activity-icon ${getActivityClass(activity.type)}`}>
-                    <i className={`fas fa-${getActivityIcon(activity.type)}`}></i>
-                  </div>
-                  <div className="activity-content">
-                    <div className="activity-title">
-                      {activity.type === 'login' && 'User Login'}
-                      {activity.type === 'signup' && 'New User Registration'}
-                      {activity.type === 'job_post' && 'New Job Posted'}
-                      {activity.type === 'job_application' && 'New Application'}
-                      {activity.type === 'message' && 'New Contact Message'}
-                      {activity.type === 'payment' && 'New Payment'}
-                      {activity.type === 'user_update' && 'User Profile Updated'}
-                      {activity.type === 'job_update' && 'Job Listing Updated'}
-                      {activity.type === 'subscription-update' && 'Subscription Plan Upgrade'}
-                    </div>
-                    <div className="activity-desc">{activity.description}</div>
-                    <div className="activity-time">{activity.time}</div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="no-activities">
-                <p>No recent activities to display</p>
-              </div>
-            )}
           </div>
         </div>
       </div>

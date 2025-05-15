@@ -282,6 +282,10 @@ function AdminApplications() {
               <i className="fas fa-chart-line"></i>
               <span>Analytics</span>
             </Link>
+            <Link to="/admin/activities" className="menu-item">
+              <i className="fas fa-history"></i>
+              <span>Recent Activities</span>
+            </Link>
             
             <div className="menu-category">Management</div>
             <Link to="/admin/users" className="menu-item">
@@ -341,6 +345,10 @@ function AdminApplications() {
             <Link to="/admin/analytics" className="menu-item">
               <i className="fas fa-chart-line"></i>
               <span>Analytics</span>
+            </Link>
+            <Link to="/admin/activities" className="menu-item">
+              <i className="fas fa-history"></i>
+              <span>Recent Activities</span>
             </Link>
             
             <div className="menu-category">Management</div>
@@ -409,6 +417,10 @@ function AdminApplications() {
           <Link to="/admin/analytics" className="menu-item">
             <i className="fas fa-chart-line"></i>
             <span>Analytics</span>
+          </Link>
+          <Link to="/admin/activities" className="menu-item">
+            <i className="fas fa-history"></i>
+            <span>Recent Activities</span>
           </Link>
           
           <div className="menu-category">Management</div>

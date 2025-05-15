@@ -119,4 +119,47 @@ const getRelativeTimeString = (date) => {
   
   const diffInYears = Math.floor(diffInMonths / 12);
   return `${diffInYears} year${diffInYears > 1 ? 's' : ''} ago`;
+};
+
+// Delete all activities
+export const deleteAllActivities = async (req, res) => {
+  try {
+    // Optional filter parameter for deleting specific activity types
+    const { type } = req.query;
+    
+    let deleteQuery = {};
+    
+    // If a specific activity type is provided, delete only those activities
+    if (type && type !== 'all') {
+      deleteQuery = { activityType: type };
+    }
+    
+    const result = await Activity.deleteMany(deleteQuery);
+    
+    // Log this activity
+    await logActivity({
+      userId: req.user._id,
+      activityType: 'admin_action',
+      description: `Deleted ${result.deletedCount} activities${type && type !== 'all' ? ` of type: ${type}` : ''}`,
+      metadata: {
+        count: result.deletedCount,
+        type: type || 'all'
+      },
+      ip: req.ip
+    });
+    
+    res.status(200).json({
+      status: 'success',
+      message: `Successfully deleted ${result.deletedCount} activities`,
+      data: {
+        deletedCount: result.deletedCount
+      }
+    });
+  } catch (error) {
+    console.error('Error deleting activities:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to delete activities'
+    });
+  }
 }; 

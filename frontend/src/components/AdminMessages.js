@@ -172,6 +172,10 @@ function AdminMessages() {
               <i className="fas fa-chart-line"></i>
               <span>Analytics</span>
             </Link>
+            <Link to="/admin/activities" className="menu-item">
+              <i className="fas fa-history"></i>
+              <span>Recent Activities</span>
+            </Link>
             
             <div className="menu-category">Management</div>
             <Link to="/admin/users" className="menu-item">
@@ -232,6 +236,10 @@ function AdminMessages() {
               <i className="fas fa-chart-line"></i>
               <span>Analytics</span>
             </Link>
+            <Link to="/admin/activities" className="menu-item">
+              <i className="fas fa-history"></i>
+              <span>Recent Activities</span>
+            </Link>
             
             <div className="menu-category">Management</div>
             <Link to="/admin/users" className="menu-item">
@@ -290,6 +298,10 @@ function AdminMessages() {
           <Link to="/admin/analytics" className="menu-item">
             <i className="fas fa-chart-line"></i>
             <span>Analytics</span>
+          </Link>
+          <Link to="/admin/activities" className="menu-item">
+            <i className="fas fa-history"></i>
+            <span>Recent Activities</span>
           </Link>
           
           <div className="menu-category">Management</div>

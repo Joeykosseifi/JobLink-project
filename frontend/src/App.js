@@ -26,6 +26,7 @@ import PostJob from './components/PostJob';
 import AdminDashboard from './components/AdminDashboard';
 import AdminMessages from './components/AdminMessages';
 import AdminAnalytics from './components/AdminAnalytics';
+import AdminActivities from './components/AdminActivities';
 import AdminApplications from './components/AdminApplications';
 import UserAccount from './components/UserAccount';
 import Settings from './components/Settings';
@@ -125,6 +126,12 @@ const AppContent = () => {
         <Route path="/admin/analytics" element={
           <ProtectedRoute 
             element={<AdminAnalytics />} 
+            nonAdminAllowed={false} 
+          />
+        } />
+        <Route path="/admin/activities" element={
+          <ProtectedRoute 
+            element={<AdminActivities />} 
             nonAdminAllowed={false} 
           />
         } />

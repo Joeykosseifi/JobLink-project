@@ -62,26 +62,6 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
     revenue: 12589
   });
 
-  const [recentActivities, setRecentActivities] = useState([]);
-
-  const fetchRecentActivities = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/admin/activities', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      if (response.data && response.data.data && response.data.data.activities) {
-        setRecentActivities(response.data.data.activities);
-      }
-    } catch (err) {
-      console.error('Error fetching recent activities:', err);
-      // Keep the current activities on error
-    }
-  }, []);
-
   const fetchJobs = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
@@ -160,8 +140,7 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
     fetchUsers();
     fetchJobs();
     fetchApplicationsCount();
-    fetchRecentActivities();
-  }, [fetchUsers, fetchJobs, fetchApplicationsCount, fetchRecentActivities]);
+  }, [fetchUsers, fetchJobs, fetchApplicationsCount]);
 
   const handleEditUser = useCallback(async (userId) => {
     try {
@@ -424,6 +403,10 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
             <i className="fas fa-chart-line"></i>
             <span>Analytics</span>
           </Link>
+          <Link to="/admin/activities" className="menu-item">
+            <i className="fas fa-history"></i>
+            <span>Recent Activities</span>
+          </Link>
           
           <div className="menu-category">Management</div>
           <button 
@@ -528,62 +511,6 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
               <i className="fas fa-arrow-down"></i>
               3% from last month
             </div>
-          </div>
-        </div>
-
-        {/* Recent Activities */}
-        <div className="dashboard-section recent-activities">
-          <div className="section-header">
-            <h2>Recent Activity</h2>
-            <div className="actions">
-              <button 
-                className="btn btn-secondary"
-                onClick={fetchRecentActivities}
-              >
-                <i className="fas fa-sync-alt"></i> Refresh
-              </button>
-            </div>
-          </div>
-          
-          <div className="activity-list">
-            {recentActivities && recentActivities.length > 0 ? (
-              recentActivities.map((activity) => (
-                <div key={activity.id} className="activity-item">
-                  <div className={`activity-icon ${activity.type}`}>
-                    <i className={`fas fa-${
-                      activity.type === 'login' ? 'sign-in-alt' :
-                      activity.type === 'signup' ? 'user-plus' :
-                      activity.type === 'job_post' ? 'briefcase' :
-                      activity.type === 'job_application' ? 'file-alt' :
-                      activity.type === 'message' ? 'envelope' :
-                      activity.type === 'payment' ? 'credit-card' :
-                      activity.type === 'user_update' ? 'user-edit' :
-                      activity.type === 'job_update' ? 'edit' :
-                      activity.type === 'subscription-update' ? 'crown' : 'bell'
-                    }`}></i>
-                  </div>
-                  <div className="activity-content">
-                    <div className="activity-title">
-                      {activity.type === 'login' && 'User Login'}
-                      {activity.type === 'signup' && 'New User Registration'}
-                      {activity.type === 'job_post' && 'New Job Posted'}
-                      {activity.type === 'job_application' && 'New Application'}
-                      {activity.type === 'message' && 'New Contact Message'}
-                      {activity.type === 'payment' && 'New Payment'}
-                      {activity.type === 'user_update' && 'User Profile Updated'}
-                      {activity.type === 'job_update' && 'Job Listing Updated'}
-                      {activity.type === 'subscription-update' && 'Subscription Plan Upgrade'}
-                    </div>
-                    <div className="activity-desc">{activity.description}</div>
-                    <div className="activity-time">{activity.relativeTime}</div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="no-activities">
-                <p>No recent activities to display</p>
-              </div>
-            )}
           </div>
         </div>
 
