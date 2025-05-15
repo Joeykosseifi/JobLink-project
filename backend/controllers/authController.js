@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { logActivity } from './activityController.js';
 
 // Helper function to generate JWT token
 const signToken = (user) => {
@@ -65,6 +66,19 @@ export const signup = async (req, res) => {
       role: newUser.role
     });
     
+    // Log signup activity
+    await logActivity({
+      userId: newUser._id,
+      activityType: 'signup',
+      description: `${newUser.name} registered as a new ${newUser.role === 'admin' ? 'admin' : newUser.jobRole || 'user'}`,
+      metadata: {
+        userEmail: newUser.email,
+        userRole: newUser.role,
+        jobRole: newUser.jobRole
+      },
+      ip: req.ip || 'unknown'
+    });
+    
     createSendToken(newUser, 201, res);
   } catch (error) {
     console.error('Error in signup:', error);
@@ -77,54 +91,79 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    console.log('Received login request for email:', req.body.email);
     const { email, password } = req.body;
 
-    // Check if email and password exist
+    // Check if email and password are provided
     if (!email || !password) {
-      console.log('Missing email or password');
       return res.status(400).json({
         status: 'error',
         message: 'Please provide email and password'
       });
     }
 
-    // Check if user exists && password is correct
+    // Check if user exists
     const user = await User.findOne({ email }).select('+password');
-    console.log('Found user:', user ? 'Yes' : 'No');
-
     if (!user) {
-      console.log('No user found with email:', email);
       return res.status(401).json({
         status: 'error',
-        message: 'Incorrect email or password'
+        message: 'Invalid credentials'
       });
     }
 
-    // Check password
-    const isPasswordCorrect = await user.correctPassword(password);
-    console.log('Password correct:', isPasswordCorrect ? 'Yes' : 'No');
-
-    if (!isPasswordCorrect) {
-      console.log('Incorrect password for user:', email);
+    // Check if user is active
+    if (!user.active) {
       return res.status(401).json({
         status: 'error',
-        message: 'Incorrect email or password'
+        message: 'Your account has been deactivated. Please contact support.'
       });
     }
 
-    console.log('Login successful for user:', {
-      id: user._id,
-      email: user.email,
-      role: user.role
+    // Check if password is correct
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Invalid credentials'
+      });
+    }
+
+    // Generate token
+    const token = signToken(user);
+
+    // Log login activity
+    await logActivity({
+      userId: user._id,
+      activityType: 'login',
+      description: `${user.name} logged in`,
+      metadata: {
+        userEmail: user.email,
+        userRole: user.role,
+        jobRole: user.jobRole
+      },
+      ip: req.ip || 'unknown'
     });
 
-    createSendToken(user, 200, res);
+    // Send response
+    res.status(200).json({
+      status: 'success',
+      token,
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          jobRole: user.jobRole,
+          active: user.active,
+          createdAt: user.createdAt
+        }
+      }
+    });
   } catch (error) {
-    console.error('Error in login:', error);
-    res.status(400).json({
+    console.error('Login error:', error);
+    res.status(500).json({
       status: 'error',
-      message: error.message
+      message: 'Something went wrong while logging in'
     });
   }
 };

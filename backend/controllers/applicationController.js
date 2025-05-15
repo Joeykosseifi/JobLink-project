@@ -1,5 +1,6 @@
 import Application from '../models/Application.js';
 import Job from '../models/Job.js';
+import { logActivity } from './activityController.js';
 
 // Get all applications (admin only)
 export const getAllApplications = async (req, res) => {
@@ -156,6 +157,23 @@ export const submitApplication = async (req, res) => {
       fullName: application.fullName,
       email: application.email,
       phone: application.phone
+    });
+    
+    // Get job details for the activity log
+    const job = await Job.findById(jobId).select('title company');
+    
+    // Log job application activity
+    await logActivity({
+      userId: req.user.id,
+      activityType: 'job_application',
+      description: `${req.user.name || application.fullName} applied for ${job.title} at ${job.company}`,
+      metadata: {
+        jobId: jobId,
+        applicationId: application._id,
+        jobTitle: job.title,
+        company: job.company
+      },
+      ip: req.ip || 'unknown'
     });
     
     res.status(201).json({

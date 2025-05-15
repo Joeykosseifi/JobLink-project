@@ -15,29 +15,30 @@ function AdminAnalytics() {
   const [timeframe, setTimeframe] = useState('month');
   const [analyticsData, setAnalyticsData] = useState({
     userStats: {
-      total: 156,
-      growth: 12,
-      newUsers: 24,
-      active: 128
+      total: 0,
+      growth: 0,
+      newUsers: 0,
+      active: 0
     },
     jobStats: {
-      total: 87,
-      growth: 5,
-      newJobs: 15,
-      active: 72
+      total: 0,
+      growth: 0,
+      newJobs: 0,
+      active: 0
     },
     applicationStats: {
-      total: 324,
-      growth: 8,
-      newApplications: 46,
-      completed: 205
+      total: 0,
+      growth: 0,
+      newApplications: 0,
+      completed: 0
     },
     revenueStats: {
-      total: 15780,
-      growth: -3,
-      newRevenue: 2450,
-      recurring: 13330
-    }
+      total: 0,
+      growth: 0,
+      newRevenue: 0,
+      recurring: 0
+    },
+    recentActivities: []
   });
   
   // Create a ref for mockApplications to avoid dependency issues
@@ -92,31 +93,6 @@ function AdminAnalytics() {
     // it doesn't need to be in the dependency array
   }, [fetchAnalyticsData]);
 
-  // Sample data for charts
-  const monthlyData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    users: [80, 92, 105, 110, 118, 125, 130, 135, 142, 146, 150, 156],
-    jobs: [42, 45, 50, 55, 60, 65, 68, 72, 75, 80, 83, 87],
-    applications: [180, 195, 210, 225, 240, 255, 270, 285, 295, 305, 315, 324],
-    revenue: [8500, 9200, 10000, 10800, 11500, 12200, 12800, 13500, 14100, 14800, 15400, 15780]
-  };
-
-  const weeklyData = {
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-    users: [144, 148, 152, 156],
-    jobs: [80, 82, 85, 87],
-    applications: [300, 308, 316, 324],
-    revenue: [14500, 14900, 15300, 15780]
-  };
-
-  const dailyData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    users: [152, 153, 154, 154, 155, 155, 156],
-    jobs: [84, 85, 85, 86, 86, 87, 87],
-    applications: [318, 319, 320, 321, 322, 323, 324],
-    revenue: [15500, 15580, 15650, 15700, 15730, 15760, 15780]
-  };
-
   // Choose the data based on selected timeframe
   const getTimeframeData = () => {
     // If we have chartData from the API, use it
@@ -124,19 +100,65 @@ function AdminAnalytics() {
       return analyticsData.chartData;
     }
 
-    // Fallback to static data (should not be needed after API integration)
-    switch(timeframe) {
-      case 'day':
-        return dailyData;
-      case 'week':
-        return weeklyData;
-      case 'month':
-      default:
-        return monthlyData;
-    }
+    // Fallback to empty data
+    return {
+      labels: [],
+      users: [],
+      jobs: [],
+      applications: [],
+      revenue: []
+    };
   };
 
   const chartData = getTimeframeData();
+
+  // Helper functions for activity icons
+  const getActivityIcon = (activityType) => {
+    switch(activityType) {
+      case 'login':
+        return 'sign-in-alt';
+      case 'signup':
+        return 'user-plus';
+      case 'job_post':
+        return 'briefcase';
+      case 'job_application':
+        return 'file-alt';
+      case 'message':
+        return 'envelope';
+      case 'payment':
+        return 'credit-card';
+      case 'user_update':
+        return 'user-edit';
+      case 'job_update':
+        return 'edit';
+      default:
+        return 'bell';
+    }
+  };
+
+  // Helper function for activity classes
+  const getActivityClass = (activityType) => {
+    switch(activityType) {
+      case 'login':
+        return 'login';
+      case 'signup':
+        return 'new-user';
+      case 'job_post':
+        return 'new-job';
+      case 'job_application':
+        return 'application';
+      case 'message':
+        return 'message';
+      case 'payment':
+        return 'payment';
+      case 'user_update':
+        return 'update';
+      case 'job_update':
+        return 'update';
+      default:
+        return '';
+    }
+  };
 
   if (loading) {
     return (
@@ -558,62 +580,33 @@ function AdminAnalytics() {
           </div>
           
           <div className="activity-list">
-            <div className="activity-item">
-              <div className="activity-icon new-user">
-                <i className="fas fa-user-plus"></i>
-              </div>
-              <div className="activity-content">
-                <div className="activity-title">New User Registered</div>
-                <div className="activity-desc">John Doe joined as an employer</div>
-                <div className="activity-time">2 hours ago</div>
-              </div>
-            </div>
-            
-            <div className="activity-item">
-              <div className="activity-icon new-job">
-                <i className="fas fa-briefcase"></i>
-              </div>
-              <div className="activity-content">
-                <div className="activity-title">New Job Posted</div>
-                <div className="activity-desc">Senior Chef at Gourmet Restaurant</div>
-                <div className="activity-time">5 hours ago</div>
-              </div>
-            </div>
-            
-            {mockApplications.map((app) => (
-              <div key={app.id} className="activity-item">
-                <div className="activity-icon application">
-                  <i className="fas fa-file-alt"></i>
+            {analyticsData.recentActivities && analyticsData.recentActivities.length > 0 ? (
+              analyticsData.recentActivities.map((activity) => (
+                <div key={activity.id} className="activity-item">
+                  <div className={`activity-icon ${getActivityClass(activity.type)}`}>
+                    <i className={`fas fa-${getActivityIcon(activity.type)}`}></i>
+                  </div>
+                  <div className="activity-content">
+                    <div className="activity-title">
+                      {activity.type === 'login' && 'User Login'}
+                      {activity.type === 'signup' && 'New User Registration'}
+                      {activity.type === 'job_post' && 'New Job Posted'}
+                      {activity.type === 'job_application' && 'New Application'}
+                      {activity.type === 'message' && 'New Contact Message'}
+                      {activity.type === 'payment' && 'New Payment'}
+                      {activity.type === 'user_update' && 'User Profile Updated'}
+                      {activity.type === 'job_update' && 'Job Listing Updated'}
+                    </div>
+                    <div className="activity-desc">{activity.description}</div>
+                    <div className="activity-time">{activity.time}</div>
+                  </div>
                 </div>
-                <div className="activity-content">
-                  <div className="activity-title">New Application</div>
-                  <div className="activity-desc">{app.user} applied for {app.job}</div>
-                  <div className="activity-time">{app.time}</div>
-                </div>
+              ))
+            ) : (
+              <div className="no-activities">
+                <p>No recent activities to display</p>
               </div>
-            ))}
-            
-            <div className="activity-item">
-              <div className="activity-icon payment">
-                <i className="fas fa-credit-card"></i>
-              </div>
-              <div className="activity-content">
-                <div className="activity-title">New Payment</div>
-                <div className="activity-desc">Premium subscription payment received</div>
-                <div className="activity-time">1 day ago</div>
-              </div>
-            </div>
-            
-            <div className="activity-item">
-              <div className="activity-icon message">
-                <i className="fas fa-envelope"></i>
-              </div>
-              <div className="activity-content">
-                <div className="activity-title">New Message</div>
-                <div className="activity-desc">Customer inquiry about job listings</div>
-                <div className="activity-time">1 day ago</div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import Job from '../models/Job.js';
 import Message from '../models/Message.js';
+import { logActivity } from './activityController.js';
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -93,6 +94,20 @@ export const deleteUser = async (req, res) => {
         message: 'User not found'
       });
     }
+
+    // Log admin user deletion activity
+    await logActivity({
+      userId: req.user.id, // Admin's user ID
+      activityType: 'admin_user_delete',
+      description: `Admin ${req.user.name} deleted user: ${user.name} (${user.email})`,
+      metadata: {
+        deletedUserId: id,
+        deletedUserEmail: user.email,
+        deletedUserName: user.name,
+        deletedUserRole: user.role
+      },
+      ip: req.ip || 'unknown'
+    });
 
     return res.status(204).json({
       status: 'success',

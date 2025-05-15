@@ -223,7 +223,22 @@ function Navbar() {
             <span className="notification-badge">{newJobsCount}</span>
           )}
         </Link>
-                <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={handleNavLinkClick}>          <i className="fas fa-envelope"></i> Contact Us        </Link>        <Link to="/pricing" className={`nav-link ${isActive('/pricing') ? 'active' : ''}`} onClick={handleNavLinkClick}>          <i className="fas fa-tag"></i> Pricing          <span className="upgrade-badge">Upgrade</span>        </Link>                {isLoggedIn && user && user.role === 'admin' && (          <Link to="/admin/dashboard" className={`admin-link ${isActive('/admin') ? 'active' : ''}`} onClick={handleNavLinkClick}>            <i className="fas fa-shield-alt"></i> Admin          </Link>        )}
+        <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`} onClick={handleNavLinkClick}>
+          <i className="fas fa-envelope"></i> Contact Us
+        </Link>
+        
+        {(!isLoggedIn || !user || user.role !== 'admin') && (
+          <Link to="/pricing" className={`nav-link ${isActive('/pricing') ? 'active' : ''}`} onClick={handleNavLinkClick}>
+            <i className="fas fa-tag"></i> Pricing
+            <span className="upgrade-badge">Upgrade</span>
+          </Link>
+        )}
+        
+        {isLoggedIn && user && user.role === 'admin' && (
+          <Link to="/admin/dashboard" className={`admin-link ${isActive('/admin') ? 'active' : ''}`} onClick={handleNavLinkClick}>
+            <i className="fas fa-shield-alt"></i> Admin
+          </Link>
+        )}
       </div>
       
       {isLoggedIn && user ? (

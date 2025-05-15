@@ -1,5 +1,6 @@
 import Job from '../models/Job.js';
 import User from '../models/User.js';
+import { logActivity } from './activityController.js';
 
 // Create a new job
 export const createJob = async (req, res) => {
@@ -17,6 +18,22 @@ export const createJob = async (req, res) => {
     }
 
     const job = await Job.create(jobData);
+    
+    // Log job posting activity
+    if (req.user) {
+      await logActivity({
+        userId: req.user.id,
+        activityType: 'job_post',
+        description: `${req.user.name} posted a new job: ${job.title} at ${job.company}`,
+        metadata: {
+          jobId: job._id,
+          jobTitle: job.title,
+          company: job.company,
+          location: job.location
+        },
+        ip: req.ip || 'unknown'
+      });
+    }
     
     res.status(201).json({
       status: 'success',
@@ -142,6 +159,22 @@ export const updateJob = async (req, res) => {
       }
     );
     
+    // Log job update activity
+    if (req.user) {
+      await logActivity({
+        userId: req.user.id,
+        activityType: 'job_update',
+        description: `${req.user.name} updated job: ${updatedJob.title} at ${updatedJob.company}`,
+        metadata: {
+          jobId: updatedJob._id,
+          jobTitle: updatedJob.title,
+          company: updatedJob.company,
+          changes: Object.keys(req.body).join(', ')
+        },
+        ip: req.ip || 'unknown'
+      });
+    }
+    
     res.status(200).json({
       status: 'success',
       data: {
@@ -178,6 +211,21 @@ export const deleteJob = async (req, res) => {
     }
     
     await Job.findByIdAndDelete(req.params.id);
+    
+    // Log job deletion activity
+    if (req.user) {
+      await logActivity({
+        userId: req.user.id,
+        activityType: 'job_delete',
+        description: `${req.user.name} deleted job: ${job.title} at ${job.company}`,
+        metadata: {
+          jobId: job._id,
+          jobTitle: job.title,
+          company: job.company
+        },
+        ip: req.ip || 'unknown'
+      });
+    }
     
     res.status(204).json({
       status: 'success',

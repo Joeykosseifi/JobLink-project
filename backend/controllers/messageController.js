@@ -1,4 +1,5 @@
 import Message from '../models/Message.js';
+import { logActivity } from './activityController.js';
 
 // Submit a new contact message
 export const submitMessage = async (req, res) => {
@@ -19,6 +20,19 @@ export const submitMessage = async (req, res) => {
       email,
       subject,
       message
+    });
+
+    // Log contact message activity
+    await logActivity({
+      userId: null, // Contact messages can be from anonymous users
+      activityType: 'message',
+      description: `${name} sent a message: ${subject}`,
+      metadata: {
+        messageId: newMessage._id,
+        email: email,
+        subject: subject
+      },
+      ip: req.ip || 'unknown'
     });
 
     return res.status(201).json({

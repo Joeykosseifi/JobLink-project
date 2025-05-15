@@ -58,9 +58,76 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
     totalUsers: 0,
     activeUsers: 0,
     totalJobs: 0,
-    applications: 157,
+    applications: 0,
     revenue: 12589
   });
+
+  const [recentActivities, setRecentActivities] = useState([]);
+
+  const fetchRecentActivities = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/admin/activities', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (response.data && response.data.data && response.data.data.activities) {
+        setRecentActivities(response.data.data.activities);
+      }
+    } catch (err) {
+      console.error('Error fetching recent activities:', err);
+      // Keep the current activities on error
+    }
+  }, []);
+
+  const fetchJobs = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/jobs', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      const fetchedJobs = response.data.data.jobs;
+      setJobs(fetchedJobs);
+      
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        totalJobs: fetchedJobs.length
+      }));
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+    }
+  }, []);
+
+  const fetchApplicationsCount = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/admin/applications', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      // The applicationController.getAllApplications returns applications.length in the results property
+      const applicationsCount = response.data.results || 0;
+      
+      console.log('Total applications count from API:', applicationsCount);
+      
+      // Update stats with the actual count from the database
+      setStats(prev => ({
+        ...prev,
+        applications: applicationsCount
+      }));
+    } catch (err) {
+      console.error('Error fetching applications count:', err);
+      // Keep the current value on error
+    }
+  }, []);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -89,32 +156,12 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
     }
   }, []);
 
-  const fetchJobs = useCallback(async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/jobs', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      const fetchedJobs = response.data.data.jobs;
-      setJobs(fetchedJobs);
-      
-      // Update stats
-      setStats(prev => ({
-        ...prev,
-        totalJobs: fetchedJobs.length
-      }));
-    } catch (err) {
-      console.error('Error fetching jobs:', err);
-    }
-  }, []);
-
   useEffect(() => {
     fetchUsers();
     fetchJobs();
-  }, [fetchUsers, fetchJobs]);
+    fetchApplicationsCount();
+    fetchRecentActivities();
+  }, [fetchUsers, fetchJobs, fetchApplicationsCount, fetchRecentActivities]);
 
   const handleEditUser = useCallback(async (userId) => {
     try {
@@ -482,6 +529,60 @@ function AdminDashboard({ activeTab: initialActiveTab = 'users' }) {
               <i className="fas fa-arrow-down"></i>
               3% from last month
             </div>
+          </div>
+        </div>
+
+        {/* Recent Activities */}
+        <div className="dashboard-section recent-activities">
+          <div className="section-header">
+            <h2>Recent Activity</h2>
+            <div className="actions">
+              <button 
+                className="btn btn-secondary"
+                onClick={fetchRecentActivities}
+              >
+                <i className="fas fa-sync-alt"></i> Refresh
+              </button>
+            </div>
+          </div>
+          
+          <div className="activity-list">
+            {recentActivities && recentActivities.length > 0 ? (
+              recentActivities.map((activity) => (
+                <div key={activity.id} className="activity-item">
+                  <div className={`activity-icon ${activity.type}`}>
+                    <i className={`fas fa-${
+                      activity.type === 'login' ? 'sign-in-alt' :
+                      activity.type === 'signup' ? 'user-plus' :
+                      activity.type === 'job_post' ? 'briefcase' :
+                      activity.type === 'job_application' ? 'file-alt' :
+                      activity.type === 'message' ? 'envelope' :
+                      activity.type === 'payment' ? 'credit-card' :
+                      activity.type === 'user_update' ? 'user-edit' :
+                      activity.type === 'job_update' ? 'edit' : 'bell'
+                    }`}></i>
+                  </div>
+                  <div className="activity-content">
+                    <div className="activity-title">
+                      {activity.type === 'login' && 'User Login'}
+                      {activity.type === 'signup' && 'New User Registration'}
+                      {activity.type === 'job_post' && 'New Job Posted'}
+                      {activity.type === 'job_application' && 'New Application'}
+                      {activity.type === 'message' && 'New Contact Message'}
+                      {activity.type === 'payment' && 'New Payment'}
+                      {activity.type === 'user_update' && 'User Profile Updated'}
+                      {activity.type === 'job_update' && 'Job Listing Updated'}
+                    </div>
+                    <div className="activity-desc">{activity.description}</div>
+                    <div className="activity-time">{activity.relativeTime}</div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="no-activities">
+                <p>No recent activities to display</p>
+              </div>
+            )}
           </div>
         </div>
 

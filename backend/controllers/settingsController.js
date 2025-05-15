@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import { logActivity } from './activityController.js';
 
 // Get user settings
 export const getSettings = async (req, res) => {
@@ -91,6 +92,21 @@ export const deleteAccount = async (req, res) => {
 
     // Delete the user (You can also implement soft delete by setting active: false)
     console.log('Attempting to delete user...');
+    
+    // Log account deletion activity before deleting the user
+    await logActivity({
+      userId: null, // We set userId to null since the user is being deleted
+      activityType: 'user_delete',
+      description: `User ${user.name} (${user.email}) deleted their account`,
+      metadata: {
+        userEmail: user.email,
+        userName: user.name,
+        userRole: user.role,
+        userId: userId
+      },
+      ip: req.ip || 'unknown'
+    });
+    
     await User.findByIdAndDelete(userId);
     console.log('User successfully deleted');
     
