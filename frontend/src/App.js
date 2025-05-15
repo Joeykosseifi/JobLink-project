@@ -20,6 +20,7 @@ import PaymentSuccess from './components/PaymentSuccess';
 import ProtectedRoute from './components/ProtectedRoute';
 import TermsOfService from './components/TermsOfService';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import SubscriptionNotification from './components/SubscriptionNotification';
 
 import PostJob from './components/PostJob';
 import AdminDashboard from './components/AdminDashboard';
@@ -47,6 +48,7 @@ const AppContent = () => {
   return (
     <div className="App">
       <Navbar />
+      <SubscriptionNotification />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/jobs" element={<Jobs />} />

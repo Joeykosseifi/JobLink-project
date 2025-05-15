@@ -21,6 +21,7 @@ export const getMe = async (req, res) => {
         email: user.email,
         role: user.role,
         jobRole: user.jobRole,
+        subscriptionPlan: user.subscriptionPlan,
         title: user.title,
         bio: user.bio,
         profileImage: user.profileImage,

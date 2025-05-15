@@ -57,13 +57,15 @@ export const signup = async (req, res) => {
       name,
       email,
       password, // Password will be hashed by the pre-save middleware
-      role: isFirstUser ? 'admin' : (role || 'user')
+      role: isFirstUser ? 'admin' : (role || 'user'),
+      subscriptionPlan: 'free' // Set default plan explicitly
     });
 
     console.log('Successfully created new user:', {
       id: newUser._id,
       email: newUser.email,
-      role: newUser.role
+      role: newUser.role,
+      subscriptionPlan: newUser.subscriptionPlan
     });
     
     // Log signup activity
@@ -74,7 +76,8 @@ export const signup = async (req, res) => {
       metadata: {
         userEmail: newUser.email,
         userRole: newUser.role,
-        jobRole: newUser.jobRole
+        jobRole: newUser.jobRole,
+        subscriptionPlan: newUser.subscriptionPlan
       },
       ip: req.ip || 'unknown'
     });
@@ -154,6 +157,7 @@ export const login = async (req, res) => {
           email: user.email,
           role: user.role,
           jobRole: user.jobRole,
+          subscriptionPlan: user.subscriptionPlan,
           active: user.active,
           createdAt: user.createdAt
         }

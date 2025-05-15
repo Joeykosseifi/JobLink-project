@@ -10,6 +10,7 @@ import jobRoutes from './routes/jobRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import applicationRoutes from './routes/applicationRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
+import subscriptionRoutes from './routes/subscriptionRoutes.js';
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

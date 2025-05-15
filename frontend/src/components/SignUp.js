@@ -50,6 +50,10 @@ function SignUp() {
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
+        
+        // Trigger the subscription notification check
+        window.dispatchEvent(new Event('userStateChanged'));
+        
         showNotification('Account created successfully! Redirecting...', 'success');
         navigate('/');
       } else {

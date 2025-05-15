@@ -30,6 +30,9 @@ function Login() {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
         
+        // Trigger the subscription notification check
+        window.dispatchEvent(new Event('userStateChanged'));
+        
         showNotification('Login successful! Redirecting...', 'success');
         
         // If user is admin, redirect to admin dashboard, otherwise go to home

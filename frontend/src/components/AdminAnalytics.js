@@ -585,8 +585,8 @@ function AdminAnalytics() {
                 <div key={activity.id} className="activity-item">
                   <div className={`activity-icon ${getActivityClass(activity.type)}`}>
                     <i className={`fas fa-${getActivityIcon(activity.type)}`}></i>
-                  </div>
-                  <div className="activity-content">
+              </div>
+              <div className="activity-content">
                     <div className="activity-title">
                       {activity.type === 'login' && 'User Login'}
                       {activity.type === 'signup' && 'New User Registration'}
@@ -596,10 +596,10 @@ function AdminAnalytics() {
                       {activity.type === 'payment' && 'New Payment'}
                       {activity.type === 'user_update' && 'User Profile Updated'}
                       {activity.type === 'job_update' && 'Job Listing Updated'}
-                    </div>
+              </div>
                     <div className="activity-desc">{activity.description}</div>
                     <div className="activity-time">{activity.time}</div>
-                  </div>
+            </div>
                 </div>
               ))
             ) : (

@@ -33,6 +33,41 @@ const userSchema = new mongoose.Schema({
     enum: ['job-seeker', 'job-poster'],
     default: 'job-seeker'
   },
+  // Subscription plan field
+  subscriptionPlan: {
+    type: String,
+    enum: ['free', 'premium', 'business'],
+    default: 'free'
+  },
+  // Billing information
+  billing: {
+    cycle: {
+      type: String,
+      enum: ['monthly', 'yearly', null],
+      default: null
+    },
+    nextBillingDate: {
+      type: Date,
+      default: null
+    },
+    amount: {
+      type: Number,
+      default: 0
+    },
+    paymentMethod: {
+      type: String,
+      default: null
+    },
+    paymentHistory: [{
+      amount: Number,
+      date: {
+        type: Date,
+        default: Date.now
+      },
+      plan: String,
+      cycle: String
+    }]
+  },
   // Profile fields
   title: {
     type: String,

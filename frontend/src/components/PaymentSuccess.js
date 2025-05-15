@@ -13,6 +13,15 @@ function PaymentSuccess() {
     billingCycle: 'monthly'
   };
   
+  // Trigger the subscription notification on mount
+  useEffect(() => {
+    // If we have valid payment data, trigger the notification update
+    if (location.state) {
+      // Dispatch event to update subscription notification
+      window.dispatchEvent(new Event('userStateChanged'));
+    }
+  }, [location.state]);
+  
   // Redirect to home if accessed directly without payment data
   useEffect(() => {
     if (!location.state) {

@@ -144,10 +144,42 @@ function PaymentPage() {
     if (validate()) {
       setIsProcessing(true);
       
-      // Simulate payment processing
-      setTimeout(() => {
+      // Get plan key from plan name (Premium -> premium, Business -> business)
+      const planKey = paymentInfo.plan.toLowerCase();
+      
+      // Call API to update subscription
+      fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/subscriptions/update`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          plan: planKey,
+          billingCycle: paymentInfo.billingCycle,
+          paymentMethod: 'card'
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to update subscription');
+        }
+        return response.json();
+      })
+      .then(data => {
         setIsProcessing(false);
         showNotification(`Successfully upgraded to ${paymentInfo.plan} plan!`, 'success');
+        
+        // Store updated user data in localStorage
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        localStorage.setItem('user', JSON.stringify({
+          ...currentUser,
+          subscriptionPlan: planKey
+        }));
+        
+        // Trigger subscription notification update immediately
+        window.dispatchEvent(new Event('userStateChanged'));
+        
         navigate('/payment-success', { 
           state: { 
             plan: paymentInfo.plan,
@@ -155,7 +187,12 @@ function PaymentPage() {
             billingCycle: paymentInfo.billingCycle
           } 
         });
-      }, 2000);
+      })
+      .catch(error => {
+        console.error('Subscription update error:', error);
+        setIsProcessing(false);
+        showNotification('Payment failed. Please try again.', 'error');
+      });
     }
   };
   

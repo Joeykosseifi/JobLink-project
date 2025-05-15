@@ -144,6 +144,10 @@ function Navbar() {
     setIsLoggedIn(false);
     setUser(null);
     setShowAccountMenu(false);
+    
+    // Trigger userStateChanged event to update subscription notification
+    window.dispatchEvent(new Event('userStateChanged'));
+    
     showNotification(`Goodbye, ${userName}! You have been logged out successfully.`, 'info');
     navigate('/login');
   };
