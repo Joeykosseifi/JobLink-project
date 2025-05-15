@@ -26,8 +26,14 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ message: 'User account is deactivated' });
     }
 
-    // Add user info to request
-    req.user = decoded;
+    // Add user info to request (include BOTH the decoded token and the full user object)
+    req.user = {
+      ...decoded,
+      role: user.role,
+      jobRole: user.jobRole,
+      active: user.active
+    };
+    
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
