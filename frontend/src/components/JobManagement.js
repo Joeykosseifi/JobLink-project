@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './JobManagement.css';
+import { useNotification } from './NotificationContext';
+import { useDialog } from './DialogContext';
 
 function JobManagement() {
   const [jobs, setJobs] = useState([]);
@@ -10,6 +12,9 @@ function JobManagement() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentUser, setCurrentUser] = useState(null);
+  const { showNotification } = useNotification();
+  const { showConfirmDialog } = useDialog();
   const jobsPerPage = 10;
 
   // Job categories for filter
@@ -36,6 +41,14 @@ function JobManagement() {
     { value: 'temporary', label: 'Temporary' }
   ];
 
+  // Get current user
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setCurrentUser(JSON.parse(userData));
+    }
+  }, []);
+
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
@@ -46,7 +59,44 @@ function JobManagement() {
         }
       });
       
-      setJobs(response.data.data.jobs);
+      const allJobs = response.data.data.jobs;
+      console.log('All jobs fetched:', allJobs.length);
+      
+      // Get current user ID from localStorage
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        const userId = user._id || user.id;
+        console.log('Current user ID:', userId);
+        
+        // Filter jobs to only show those posted by the current user
+        const userJobs = allJobs.filter(job => {
+          // postedBy might be an object with _id or a string ID
+          if (job.postedBy) {
+            console.log('Job ID:', job._id, 'Posted by:', job.postedBy);
+            
+            if (typeof job.postedBy === 'object' && job.postedBy._id) {
+              return job.postedBy._id === userId;
+            } else if (typeof job.postedBy === 'string') {
+              return job.postedBy === userId;
+            } else {
+              return String(job.postedBy) === String(userId);
+            }
+          }
+          return false;
+        });
+        console.log('Filtered jobs for current user:', userJobs.length);
+        setJobs(userJobs);
+        
+        // If the user is an admin, show all jobs
+        if (user.role === 'admin') {
+          console.log('User is admin, showing all jobs');
+          setJobs(allJobs);
+        }
+      } else {
+        setJobs([]);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching jobs:', error);
@@ -60,26 +110,28 @@ function JobManagement() {
   }, [fetchJobs]);
 
   const handleDeleteJob = useCallback(async (jobId) => {
-    try {
-      if (!window.confirm('Are you sure you want to delete this job?')) {
-        return;
-      }
+    showConfirmDialog({
+      title: 'Delete Job',
+      message: 'Are you sure you want to delete this job? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          await axios.delete(`http://localhost:5000/api/jobs/${jobId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
 
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/jobs/${jobId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
+          // Remove the deleted job from the state
+          setJobs(prevJobs => prevJobs.filter(job => job._id !== jobId));
+          showNotification('Job deleted successfully!', 'success');
+        } catch (error) {
+          console.error('Error deleting job:', error);
+          showNotification(error.response?.data?.message || 'Failed to delete job', 'error');
         }
-      });
-
-      // Remove the deleted job from the state
-      setJobs(prevJobs => prevJobs.filter(job => job._id !== jobId));
-      alert('Job deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting job:', error);
-      alert(error.response?.data?.message || 'Failed to delete job');
-    }
-  }, []);
+      }
+    });
+  }, [showConfirmDialog, showNotification]);
 
   const navigateToJobEdit = (jobId) => {
     window.location.href = `/jobs/${jobId}`;
@@ -277,6 +329,7 @@ function JobManagement() {
                         >
                           <i className='bx bx-edit'></i>
                         </button>
+                        {/* Show delete button for jobs posted by the current user */}
                         <button 
                           className="action-btn delete"
                           onClick={() => handleDeleteJob(job._id)}

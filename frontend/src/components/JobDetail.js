@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './JobDetail.css';
 import { useNotification } from './NotificationContext';
+import { useDialog } from './DialogContext';
 
 function JobDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isApplying, setIsApplying] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [cv, setCv] = useState(null);
+  const [isJobPoster, setIsJobPoster] = useState(false);
   const { showNotification } = useNotification();
+  const { showConfirmDialog } = useDialog();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -26,7 +30,44 @@ function JobDetail() {
     setLoading(true);
     try {
       const response = await axios.get(`http://localhost:5000/api/jobs/${id}`);
-      setJob(response.data.data.job);
+      const jobData = response.data.data.job;
+      setJob(jobData);
+      
+      // Check if current user is the job poster
+      const userData = localStorage.getItem('user');
+      if (userData && jobData.postedBy) {
+        const user = JSON.parse(userData);
+        const userId = user._id || user.id;
+        
+        console.log('Job poster check:', {
+          userId,
+          postedBy: jobData.postedBy,
+          postedByType: typeof jobData.postedBy,
+          postedById: typeof jobData.postedBy === 'object' ? jobData.postedBy._id : jobData.postedBy
+        });
+        
+        // Check if job.postedBy is an object with _id or a string
+        let isUserJobPoster = false;
+        
+        if (typeof jobData.postedBy === 'object' && jobData.postedBy._id) {
+          isUserJobPoster = jobData.postedBy._id === userId;
+        } else if (typeof jobData.postedBy === 'string') {
+          isUserJobPoster = jobData.postedBy === userId;
+        } else {
+          // Try string comparison as fallback
+          isUserJobPoster = String(jobData.postedBy) === String(userId);
+        }
+        
+        console.log('Is user the job poster?', isUserJobPoster);
+        setIsJobPoster(isUserJobPoster);
+        
+        // Also check if user is admin (admins can also delete jobs)
+        if (user.role === 'admin') {
+          console.log('User is admin, enabling delete button');
+          setIsJobPoster(true);
+        }
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching job details:', error);
@@ -72,6 +113,30 @@ function JobDetail() {
         formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 100);
+  };
+  
+  const handleDeleteJob = async () => {
+    showConfirmDialog({
+      title: 'Delete Job',
+      message: 'Are you sure you want to delete this job? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          
+          await axios.delete(`http://localhost:5000/api/jobs/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          
+          showNotification('Job deleted successfully!', 'success');
+          navigate('/jobs');
+        } catch (error) {
+          console.error('Error deleting job:', error);
+          showNotification(error.response?.data?.message || 'Failed to delete job', 'error');
+        }
+      }
+    });
   };
   
   const handleInputChange = (e) => {
@@ -599,9 +664,20 @@ function JobDetail() {
           <a href="/jobs" className="back-to-jobs-btn">
             <i className='bx bx-arrow-back'></i> Back to Jobs
           </a>
-          <button className="share-job-btn" onClick={handleShareJob}>
-            <i className='bx bx-share-alt'></i> Share Job
-          </button>
+          <div className="action-buttons-container">
+            <button className="share-job-btn" onClick={handleShareJob}>
+              <i className='bx bx-share-alt'></i> Share Job
+            </button>
+            {isJobPoster && (
+              <button className="delete-job-btn" onClick={handleDeleteJob}>
+                <i className='bx bx-trash'></i> Delete Job
+              </button>
+            )}
+            {/* Debug info */}
+            <div style={{ display: 'none' }}>
+              Is job poster: {isJobPoster ? 'Yes' : 'No'}
+            </div>
+          </div>
         </div>
       </div>
     </div>
