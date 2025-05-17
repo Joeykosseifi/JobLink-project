@@ -28,6 +28,32 @@ export const getSettings = async (req, res) => {
         preferences: {
           darkMode: false,
           language: 'english'
+        },
+        security: {
+          twoFactorEnabled: false,
+          loginNotifications: true,
+          lastPasswordChange: new Date()
+        },
+        profileInfo: {
+          bio: '',
+          skills: [],
+          resumeUploaded: false
+        },
+        jobPreferences: {
+          desiredSalary: {
+            min: 30000,
+            max: 100000
+          },
+          preferredLocations: [],
+          jobTypes: [],
+          remoteOnly: false,
+          availableFrom: ''
+        },
+        connectedAccounts: {
+          google: false,
+          linkedin: false,
+          facebook: false,
+          github: false
         }
       };
 
@@ -36,6 +62,52 @@ export const getSettings = async (req, res) => {
       await user.save();
 
       return res.json({ settings: defaultSettings });
+    }
+
+    // Add security field if it doesn't exist in user settings
+    if (!user.settings.security) {
+      user.settings.security = {
+        twoFactorEnabled: false,
+        loginNotifications: true,
+        lastPasswordChange: new Date()
+      };
+      await user.save();
+    }
+
+    // Add profileInfo field if it doesn't exist in user settings
+    if (!user.settings.profileInfo) {
+      user.settings.profileInfo = {
+        bio: '',
+        skills: [],
+        resumeUploaded: false
+      };
+      await user.save();
+    }
+
+    // Add jobPreferences field if it doesn't exist in user settings
+    if (!user.settings.jobPreferences) {
+      user.settings.jobPreferences = {
+        desiredSalary: {
+          min: 30000,
+          max: 100000
+        },
+        preferredLocations: [],
+        jobTypes: [],
+        remoteOnly: false,
+        availableFrom: ''
+      };
+      await user.save();
+    }
+
+    // Add connectedAccounts field if it doesn't exist in user settings
+    if (!user.settings.connectedAccounts) {
+      user.settings.connectedAccounts = {
+        google: false,
+        linkedin: false,
+        facebook: false,
+        github: false
+      };
+      await user.save();
     }
 
     res.json({ settings: user.settings });

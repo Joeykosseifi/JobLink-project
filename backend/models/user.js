@@ -115,6 +115,32 @@ const userSchema = new mongoose.Schema({
     preferences: {
       darkMode: { type: Boolean, default: false },
       language: { type: String, default: 'english' }
+    },
+    security: {
+      twoFactorEnabled: { type: Boolean, default: false },
+      loginNotifications: { type: Boolean, default: true },
+      lastPasswordChange: { type: Date, default: Date.now }
+    },
+    profileInfo: {
+      bio: { type: String, default: '' },
+      skills: [{ type: String }],
+      resumeUploaded: { type: Boolean, default: false }
+    },
+    jobPreferences: {
+      desiredSalary: {
+        min: { type: Number, default: 30000 },
+        max: { type: Number, default: 100000 }
+      },
+      preferredLocations: [{ type: String }],
+      jobTypes: [{ type: String }],
+      remoteOnly: { type: Boolean, default: false },
+      availableFrom: { type: String, default: '' }
+    },
+    connectedAccounts: {
+      google: { type: Boolean, default: false },
+      linkedin: { type: Boolean, default: false },
+      facebook: { type: Boolean, default: false },
+      github: { type: Boolean, default: false }
     }
   },
   active: {
