@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotification } from './NotificationContext';
 import './Pricing.css';
@@ -8,9 +8,27 @@ function Pricing() {
   // eslint-disable-next-line no-unused-vars
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [expandedFaqs, setExpandedFaqs] = useState([0, 1, 2, 3]); // All expanded by default
+  const [currentPlan, setCurrentPlan] = useState('free'); // Default to free plan
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const isLoggedIn = localStorage.getItem('token') !== null;
+
+  // Get the current user's subscription plan from localStorage
+  useEffect(() => {
+    if (isLoggedIn) {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          if (user.subscriptionPlan) {
+            setCurrentPlan(user.subscriptionPlan);
+          }
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+        }
+      }
+    }
+  }, [isLoggedIn]);
 
   const plans = {
     free: {
@@ -65,8 +83,8 @@ function Pricing() {
       return;
     }
     
-    if (plan === 'free') {
-      showNotification('You are already on the Free plan', 'info');
+    if (plan === currentPlan) {
+      showNotification(`You are already on the ${plans[plan].name} plan`, 'info');
       return;
     }
     
@@ -104,6 +122,19 @@ function Pricing() {
     return savings.toFixed(2);
   };
 
+  // Get button text based on current plan
+  const getButtonText = (planKey) => {
+    if (planKey === currentPlan) {
+      return 'Current Plan';
+    }
+    return plans[planKey].cta;
+  };
+
+  // Get button disabled state based on current plan
+  const isButtonDisabled = (planKey) => {
+    return planKey === currentPlan;
+  };
+
   return (
     <div className="pricing-container">
       <h1 className="pricing-title">Choose Your JobLink Plan</h1>
@@ -126,9 +157,10 @@ function Pricing() {
 
       <div className="pricing-cards">
         {Object.entries(plans).map(([key, plan]) => (
-          <div key={key} className={`pricing-card ${plan.color}`}>
+          <div key={key} className={`pricing-card ${plan.color} ${key === currentPlan ? 'current-plan' : ''}`}>
             <div className="plan-header">
               <h2>{plan.name}</h2>
+              {key === currentPlan && <span className="current-plan-badge">Current</span>}
               <div className="plan-price">
                 <span className="price">{getPriceDisplay(plan)}</span>
                 {billingCycle === 'yearly' && getSavingsAmount(plan) && (
@@ -146,11 +178,11 @@ function Pricing() {
             </ul>
             
             <button 
-              className={`upgrade-button ${plan.color}`}
+              className={`upgrade-button ${plan.color} ${key === currentPlan ? 'current' : ''}`}
               onClick={() => handleSelectPlan(key)}
-              disabled={key === 'free'}
+              disabled={isButtonDisabled(key)}
             >
-              {plan.cta}
+              {getButtonText(key)}
             </button>
           </div>
         ))}

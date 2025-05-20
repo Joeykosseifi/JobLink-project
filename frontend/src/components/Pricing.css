@@ -490,4 +490,40 @@ input:checked + .slider:before {
   .pricing-cards {
     grid-template-columns: repeat(3, 90%);
   }
+}
+
+/* Add a current plan badge and styling */
+.current-plan-badge {
+  background-color: #4caf50;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+/* Highlight the current plan card */
+.pricing-card.current-plan {
+  border: 2px solid #4caf50;
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.15);
+}
+
+.pricing-card {
+  position: relative; /* For positioning the badge */
+}
+
+/* Style for current plan button */
+.upgrade-button.current {
+  background-color: #4caf50 !important;
+  cursor: default;
+}
+
+/* Hover effect for current plan card */
+.pricing-card.current-plan:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.2);
 } 
