@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import './AdminApplications.css';
 import { useNotification } from './NotificationContext';
@@ -15,100 +15,6 @@ function AdminApplications() {
 
   const { showNotification } = useNotification();
   const { showConfirmDialog } = useDialog();
-
-  // Mock data for UI development - wrapped in useMemo to avoid recreation on each render
-  const mockApplications = useMemo(() => [
-    {
-      _id: '1',
-      jobId: {
-        _id: 'job1',
-        title: 'Head Chef',
-        company: 'Gourmet Restaurant',
-        location: 'New York'
-      },
-      applicantId: {
-        _id: 'user1',
-        name: 'John Davis',
-        email: 'john@example.com'
-      },
-      resume: 'resume_john_davis.pdf',
-      coverLetter: 'I have 10 years of experience...',
-      status: 'pending',
-      createdAt: '2023-09-15T10:30:00.000Z'
-    },
-    {
-      _id: '2',
-      jobId: {
-        _id: 'job2',
-        title: 'Hotel Manager',
-        company: 'Luxury Hotel',
-        location: 'Los Angeles'
-      },
-      applicantId: {
-        _id: 'user2',
-        name: 'Jane Smith',
-        email: 'jane@example.com'
-      },
-      resume: 'resume_jane_smith.pdf',
-      coverLetter: 'I am passionate about hospitality...',
-      status: 'reviewed',
-      createdAt: '2023-09-14T15:45:00.000Z'
-    },
-    {
-      _id: '3',
-      jobId: {
-        _id: 'job3',
-        title: 'Restaurant Server',
-        company: 'Fine Dining',
-        location: 'Chicago'
-      },
-      applicantId: {
-        _id: 'user3',
-        name: 'Sarah Johnson',
-        email: 'sarah@example.com'
-      },
-      resume: 'resume_sarah_johnson.pdf',
-      coverLetter: 'With 5 years of experience in customer service...',
-      status: 'interviewed',
-      createdAt: '2023-09-12T09:15:00.000Z'
-    },
-    {
-      _id: '4',
-      jobId: {
-        _id: 'job4',
-        title: 'Bar Manager',
-        company: 'Upscale Lounge',
-        location: 'Miami'
-      },
-      applicantId: {
-        _id: 'user4',
-        name: 'Michael Brown',
-        email: 'michael@example.com'
-      },
-      resume: 'resume_michael_brown.pdf',
-      coverLetter: 'I have managed several high-volume bars...',
-      status: 'offered',
-      createdAt: '2023-09-10T14:20:00.000Z'
-    },
-    {
-      _id: '5',
-      jobId: {
-        _id: 'job5',
-        title: 'Sous Chef',
-        company: 'Gourmet Restaurant',
-        location: 'New York'
-      },
-      applicantId: {
-        _id: 'user5',
-        name: 'Robert Wilson',
-        email: 'robert@example.com'
-      },
-      resume: 'resume_robert_wilson.pdf',
-      coverLetter: 'Having worked in Michelin-starred restaurants...',
-      status: 'rejected',
-      createdAt: '2023-09-08T11:30:00.000Z'
-    }
-  ], []);
 
   const fetchApplications = useCallback(async () => {
     try {
@@ -136,20 +42,16 @@ function AdminApplications() {
       if (data.data.applications && data.data.applications.length > 0) {
         setApplications(data.data.applications);
       } else {
-        // Use mock data if no real applications exist yet
-        console.log('No applications found in database, using mock data');
-        setApplications(mockApplications);
+        // Don't use mock data, just set an empty array to show the no applications message
+        setApplications([]);
       }
       setLoading(false);
     } catch (err) {
       console.error('Error fetching applications:', err);
-      // Use mock data on error as fallback
-      console.log('Error fetching applications, using mock data instead');
-      setApplications(mockApplications);
-      setError(null); // Clear the error since we're showing mock data
+      setError('Failed to fetch applications. Please try again later.');
       setLoading(false);
     }
-  }, [mockApplications, showNotification]);
+  }, [showNotification]);
 
   useEffect(() => {
     fetchApplications();
@@ -199,6 +101,46 @@ function AdminApplications() {
     });
   };
 
+  const handleDeleteApplication = async (id) => {
+    showConfirmDialog({
+      title: 'Delete Application',
+      message: 'Are you sure you want to delete this application? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmButtonClass: 'btn-danger',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem('token');
+          
+          if (!token) {
+            showNotification('Authentication required', 'error');
+            return;
+          }
+          
+          const response = await fetch(`http://localhost:5000/api/admin/applications/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to delete application');
+          }
+          
+          // Update the local state
+          setApplications(applications.filter(app => app._id !== id));
+
+          // Show a success notification
+          showNotification('Application has been deleted successfully', 'success');
+        } catch (error) {
+          console.error('Error deleting application:', error);
+          showNotification(error.message, 'error');
+        }
+      }
+    });
+  };
+
   // Filter applications based on search and status filter
   const filteredApplications = applications.filter(app => {
     // Search filter (search by applicant name, email, phone, job title, or company)
@@ -209,8 +151,8 @@ function AdminApplications() {
       (app.phone && app.phone.toLowerCase().includes(search.toLowerCase())) ||
       (app.applicantId && app.applicantId.name && app.applicantId.name.toLowerCase().includes(search.toLowerCase())) ||
       (app.applicantId && app.applicantId.email && app.applicantId.email.toLowerCase().includes(search.toLowerCase())) ||
-      app.jobId.title.toLowerCase().includes(search.toLowerCase()) ||
-      app.jobId.company.toLowerCase().includes(search.toLowerCase());
+      (app.jobId && app.jobId.title && app.jobId.title.toLowerCase().includes(search.toLowerCase())) ||
+      (app.jobId && app.jobId.company && app.jobId.company.toLowerCase().includes(search.toLowerCase()));
     
     // Status filter
     const statusMatch = 
@@ -546,8 +488,8 @@ function AdminApplications() {
         {applications.length === 0 ? (
           <div className="no-applications">
             <i className="fas fa-file-alt"></i>
-            <h2>No applications yet</h2>
-            <p>Applications from job seekers will appear here.</p>
+            <h2>No applications in the system</h2>
+            <p>There are currently no job applications in the database. Applications will appear here when job seekers apply for positions.</p>
           </div>
         ) : (
           <div className="applications-table-container">
@@ -567,16 +509,16 @@ function AdminApplications() {
                   <tr key={app._id}>
                     <td>
                       <div className="applicant-info">
-                        <span className="applicant-name">{app.fullName || app.applicantId.name}</span>
-                        <span className="applicant-email">{app.email || app.applicantId.email}</span>
+                        <span className="applicant-name">{app.fullName || (app.applicantId && app.applicantId.name) || 'N/A'}</span>
+                        <span className="applicant-email">{app.email || (app.applicantId && app.applicantId.email) || 'N/A'}</span>
                         {app.phone && <span className="applicant-phone">{app.phone}</span>}
                       </div>
                     </td>
-                    <td>{app.jobId.title}</td>
+                    <td>{app.jobId && app.jobId.title ? app.jobId.title : 'N/A'}</td>
                     <td>
                       <div className="company-info">
-                        <span className="company-name">{app.jobId.company}</span>
-                        <span className="company-location">{app.jobId.location}</span>
+                        <span className="company-name">{app.jobId && app.jobId.company ? app.jobId.company : 'N/A'}</span>
+                        <span className="company-location">{app.jobId && app.jobId.location ? app.jobId.location : 'N/A'}</span>
                       </div>
                     </td>
                     <td>{formatDate(app.createdAt)}</td>
@@ -613,6 +555,13 @@ function AdminApplications() {
                           onClick={() => {/* Open email client */}}
                         >
                           <i className="fas fa-envelope"></i>
+                        </button>
+                        <button 
+                          className="action-btn delete-btn"
+                          title="Delete Application"
+                          onClick={() => handleDeleteApplication(app._id)}
+                        >
+                          <i className="fas fa-trash-alt"></i>
                         </button>
                       </div>
                     </td>

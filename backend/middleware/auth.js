@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-export const protect = async (req, res, next) => {
+export const protect = async (req, res, next) => { //the protect middleware is to protect the routes that are not public if the jwt valid the request proceed normally. if not, it will be canceled.
   try {
     // Get token from header
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization; // req is divided in 2 parts: header and body.
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'No token provided' });
     }
@@ -12,7 +12,7 @@ export const protect = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); //jwt.verify is to verify the token with the secret key.
 
     // Check if user still exists
     const user = await User.findById(decoded.id);
@@ -34,7 +34,7 @@ export const protect = async (req, res, next) => {
       active: user.active
     };
     
-    next();
+    next(); // accept the request and proceed to the next middleware or route handler
   } catch (error) {
     console.error('Auth middleware error:', error);
     res.status(401).json({
@@ -45,13 +45,13 @@ export const protect = async (req, res, next) => {
 };
 
 // Middleware to restrict access based on roles
-export const restrictTo = (...roles) => {
+export const restrictTo = (...roles) => { //restrictTo is to restrict the access to the routes based on the roles.
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         message: 'You do not have permission to perform this action'
       });
     }
-    next();
+    next(); // accept the request and proceed to the next middleware or route handler
   };
 }; 

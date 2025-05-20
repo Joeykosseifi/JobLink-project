@@ -52,7 +52,7 @@ function SignUp() {
         localStorage.setItem('user', JSON.stringify(response.data.data.user));
         
         // Trigger the subscription notification check
-        window.dispatchEvent(new Event('userStateChanged'));
+        window.dispatchEvent(new Event('userStateChanged')); // dispatch an event to notify the app that the user state has changed
         
         showNotification('Account created successfully! Redirecting...', 'success');
         navigate('/');

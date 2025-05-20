@@ -328,6 +328,15 @@
   background-color: #c6f6d5;
 }
 
+.delete-btn {
+  background-color: #fff5f5;
+  color: #e53e3e;
+}
+
+.delete-btn:hover {
+  background-color: #fed7d7;
+}
+
 /* Status Dropdown */
 .status-dropdown {
   position: relative;

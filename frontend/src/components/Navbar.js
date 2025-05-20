@@ -240,7 +240,7 @@ function Navbar() {
         
         {isLoggedIn && user && user.role === 'admin' && (
           <Link to="/admin/dashboard" className={`admin-link ${isActive('/admin') ? 'active' : ''}`} onClick={handleNavLinkClick}>
-            <i className="fas fa-shield-alt"></i> Admin
+            <i className="fas fa-shield-alt"></i> Dashboard
           </Link>
         )}
       </div>

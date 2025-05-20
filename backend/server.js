@@ -17,12 +17,12 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
+// Middleware 
 app.use(cors({
   origin: 'http://localhost:3000',
-  credentials: true
+  credentials: true //kelchi authenticaions
 }));
-app.use(express.json());
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from uploads directory
@@ -53,10 +53,7 @@ mongoose.connection.on('connected', () => {
   console.log('MongoDB connected');
 });
 
-// Test route
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Backend is working!' });
-});
+
 
 // Routes
 app.use('/api/auth', authRoutes);

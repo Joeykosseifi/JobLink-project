@@ -3,15 +3,15 @@ import Job from '../models/Job.js';
 import { logActivity } from './activityController.js';
 
 // Get all applications (admin only)
-export const getAllApplications = async (req, res) => {
+export const getAllApplications = async (req, res) => { 
   try {
     const applications = await Application.find()
-      .populate('jobId', 'title company location')
+      .populate('jobId', 'title company location') 
       .populate('applicantId', 'name email')
       .select('jobId applicantId fullName email phone status resume coverLetter createdAt updatedAt')
       .sort({ createdAt: -1 });
     
-    res.status(200).json({
+    res.status(200).json({ //send the response
       status: 'success',
       results: applications.length,
       data: {
@@ -35,7 +35,7 @@ export const getApplicationById = async (req, res) => {
       .populate('applicantId', 'name email')
       .select('jobId applicantId fullName email phone status resume coverLetter currentCompany linkedInProfile createdAt updatedAt');
     
-    if (!application) {
+    if (!application) { //if the application is not found
       return res.status(404).json({
         status: 'fail',
         message: 'Application not found'

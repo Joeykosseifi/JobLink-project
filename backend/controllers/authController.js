@@ -1,10 +1,10 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
-import { logActivity } from './activityController.js';
+import bcrypt from 'bcryptjs'; //bcrypt is to hash the password
+import jwt from 'jsonwebtoken'; //jwt is to generate the token
+import User from '../models/User.js'; //User is the model for the user
+import { logActivity } from './activityController.js'; //logActivity is to log the activity 
 
 // Helper function to generate JWT token
-const signToken = (user) => {
+const signToken = (user) => { //signToken is to generate the token
   return jwt.sign(
     { 
       id: user._id,
@@ -16,20 +16,20 @@ const signToken = (user) => {
 };
 
 // Helper function to create and send token response
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, res) => { //createSendToken is to create and send the token response
   const token = signToken(user);
 
   // Remove password from output
   user.password = undefined;
 
-  res.status(statusCode).json({
+  res.status(statusCode).json({ 
     status: 'success',
     token,
     data: { user }
   });
 };
-
-export const signup = async (req, res) => {
+// Sign up function
+export const signup = async (req, res) => { 
   try {
     console.log('Received signup request with data:', {
       ...req.body,
@@ -92,6 +92,7 @@ export const signup = async (req, res) => {
   }
 };
 
+// Login function
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -122,7 +123,7 @@ export const login = async (req, res) => {
     }
 
     // Check if password is correct
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password); //bcrypt is to compare the password with the hashed password
     if (!isMatch) {
       return res.status(401).json({
         status: 'error',
@@ -172,6 +173,7 @@ export const login = async (req, res) => {
   }
 };
 
+// Get profile function
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);

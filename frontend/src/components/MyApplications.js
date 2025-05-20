@@ -122,8 +122,8 @@ function MyApplications() {
               <div key={application._id} className="application-card">
                 <div className="application-header">
                   <div className="job-info">
-                    <h2 className="job-title">{application.jobId.title}</h2>
-                    <p className="company-name">{application.jobId.company}</p>
+                    <h2 className="job-title">{application.jobId && application.jobId.title ? application.jobId.title : 'N/A'}</h2>
+                    <p className="company-name">{application.jobId && application.jobId.company ? application.jobId.company : 'N/A'}</p>
                   </div>
                   <div className={`application-status ${getStatusClass(application.status)}`}>
                     {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
@@ -143,7 +143,7 @@ function MyApplications() {
                     <i className='bx bx-map'></i>
                     <div>
                       <h3>Location</h3>
-                      <p>{application.jobId.location}</p>
+                      <p>{application.jobId && application.jobId.location ? application.jobId.location : 'N/A'}</p>
                     </div>
                   </div>
                   
@@ -163,7 +163,7 @@ function MyApplications() {
                 
                 <div className="application-footer">
                   <a 
-                    href={`/jobs/${application.jobId._id}`} 
+                    href={application.jobId && application.jobId._id ? `/jobs/${application.jobId._id}` : '#'} 
                     className="view-job-btn"
                   >
                     View Job
